@@ -1,6 +1,9 @@
 # local files
 .bashrc
 torch_test.ipynb
+data/
+*.zip
+.idea/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
