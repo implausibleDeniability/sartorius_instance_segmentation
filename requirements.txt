@@ -1,2 +1,6 @@
 easydict
-dotenv-python
+python-dotenv
+
+numpy
+python-dotenv
+scikit-image
