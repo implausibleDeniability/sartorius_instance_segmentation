@@ -1,6 +1,7 @@
 easydict
 python-dotenv
-
-numpy
-python-dotenv
+pytorch-toolbelt
+scikit-learn
 scikit-image
+albumentations 
+ipywidgets
