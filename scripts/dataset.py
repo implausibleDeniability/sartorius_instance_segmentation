@@ -61,7 +61,7 @@ class CellDataset(Dataset):
             'boxes': torch.as_tensor(boxes),
             'iscrowd': iscrowd,
             'area': torch.as_tensor(area),
-            'image_id': image_id,  # For logging purposes
+            # 'image_id': image_id,  # For logging purposes
         }
 
 
