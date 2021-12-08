@@ -5,3 +5,5 @@ scikit-learn
 scikit-image
 albumentations 
 ipywidgets
+python-dotenv
+opencv-python

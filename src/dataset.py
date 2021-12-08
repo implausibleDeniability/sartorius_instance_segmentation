@@ -1,13 +1,13 @@
+import albumentations as A
+import numpy as np
 import pandas as pd
+import torch
+from easydict import EasyDict
+from skimage import io
 from sklearn.model_selection import train_test_split
 from torch.utils.data import Dataset
-from easydict import EasyDict
-import torch
-import numpy as np
-from skimage import io
-import albumentations as A
 
-from scripts.utils import annotation2mask, get_box
+from src.utils import annotation2mask, get_box
 
 
 class CellDataset(Dataset):

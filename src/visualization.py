@@ -1,8 +1,10 @@
-import torch
-import numpy as np
 from functools import reduce
-from matplotlib import pyplot as plt
+
 import cv2
+import numpy as np
+import torch
+from matplotlib import pyplot as plt
+
 
 def show_image(im: torch.Tensor, boxes, masks):
     """

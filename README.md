@@ -8,3 +8,10 @@ Download data:
 - `kaggle competitions download -c sartorius-cell-instance-segmentation`
 - `unzip sartorius-cell-instance-segmentation.zip`
 
+Example of .env file:
+
+```
+IMAGE_HEIGHT=520
+IMAGE_WIDTH=704
+dataset_path="/home/shamil/PycharmProjects/sartorius_instance_segmentation/data"
+```
