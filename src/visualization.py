@@ -8,6 +8,7 @@ from matplotlib import pyplot as plt
 
 def tensor_to_image(im: torch.Tensor):
     im = np.transpose(im.numpy(), axes=(1, 2, 0))
+    # noinspection PyArgumentList
     im = (im - im.min()) / (im.max() - im.min())
     im = np.asarray(im * 255., dtype=np.uint8)
 
