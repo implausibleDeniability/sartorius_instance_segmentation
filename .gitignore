@@ -4,7 +4,7 @@ torch_test.ipynb
 data/
 *.zip
 .idea/
-
+*.ckpt
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

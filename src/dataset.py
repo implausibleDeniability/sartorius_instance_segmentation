@@ -12,7 +12,7 @@ from src.utils import annotation2mask, get_box
 
 class CellDataset(Dataset):
     def __init__(self, cfg: EasyDict, mode: str, transform: A.Compose = None):
-        assert mode == 'train' or mode == 'test'
+        assert mode == 'train' or mode == 'val'
 
         self.transform = transform
         self.image_folder = cfg.dataset_path / "train"
