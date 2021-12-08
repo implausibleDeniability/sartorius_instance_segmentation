@@ -58,7 +58,7 @@ class CellDataset(Dataset):
         target = {
             'masks': torch.as_tensor(masks),
             'labels': torch.as_tensor(labels, dtype=torch.int64),
-            'boxes': torch.as_tensor(boxes),
+            'boxes': torch.as_tensor(boxes, dtype=torch.float32),
             'iscrowd': iscrowd,
             'area': torch.as_tensor(area),
             # 'image_id': image_id,  # For logging purposes
