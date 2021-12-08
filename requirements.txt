@@ -8,3 +8,4 @@ ipywidgets
 python-dotenv
 opencv-python
 torchvision
+shapely

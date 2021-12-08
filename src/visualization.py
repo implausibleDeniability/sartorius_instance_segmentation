@@ -6,6 +6,14 @@ import torch
 from matplotlib import pyplot as plt
 
 
+def tensor_to_image(im: torch.Tensor):
+    im = np.transpose(im.numpy(), axes=(1, 2, 0))
+    im = (im - im.min()) / (im.max() - im.min())
+    im = np.asarray(im * 255., dtype=np.uint8)
+
+    return im
+
+
 def show_image(im: torch.Tensor, boxes, masks):
     """
     Args:
@@ -16,9 +24,7 @@ def show_image(im: torch.Tensor, boxes, masks):
     Visualization instance of dataset after augmentation
     """
     # torch image preprocessed for plotting with matplotlib
-    im = np.transpose(im.numpy(), axes=(1, 2, 0))
-    im = (im - im.min()) / (im.max() - im.min())
-    im = np.asarray(im * 256., dtype=np.uint8)
+    im = tensor_to_image(im)
 
     image_mask = reduce(lambda x, y: x + y, masks)
 
@@ -31,7 +37,7 @@ def show_image(im: torch.Tensor, boxes, masks):
     red_color = (255, 0, 0)
     for x1, y1, x2, y2 in boxes:
         image_with_mask = cv2.rectangle(image_with_mask.copy(), pt1=(int(x1), int(y1)), pt2=(int(x2), int(y2)), color=red_color, thickness=2)
-    
+
     plt.figure(figsize=(15, 15))
     plt.imshow(image_with_mask)
     plt.xticks([])
