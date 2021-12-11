@@ -24,16 +24,19 @@ def put_mask_on_image(image: torch.Tensor, masks: np.ndarray) -> np.ndarray:
     return image_with_mask
 
 
-def plot_two_masks(image: np.ndarray, predicted_mask: np.ndarray, true_mask: np.ndarray, color=(255, 255, 0)):
-    image_mask1 = put_mask_on_image(image, masks1)
-    image_mask2 = put_mask_on_image(image, masks2)
+def plot_two_masks(image: np.ndarray, predicted_mask: np.ndarray, true_mask: np.ndarray, 
+                   color=(255, 255, 0), filename=None):
+    image_mask1 = put_mask_on_image(image, predicted_mask)
+    image_mask2 = put_mask_on_image(image, true_mask)
     plt.figure(figsize=(20, 8))
     plt.subplot(121)
     plt.imshow(image_mask1)
     plt.subplot(122)
     plt.imshow(image_mask2)
-    plt.show()
-    
+    if filename is None:
+        plt.show()
+    else:
+        plt.savefig(filename, dpi=80)
 
 def plot_mask_bbox(image: torch.Tensor, boxes, masks, figure_scale: int=15):
     """Visualization instance of dataset after augmentation
