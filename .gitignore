@@ -2,6 +2,7 @@
 .bashrc
 torch_test.ipynb
 data/
+imagelogs/
 *.zip
 .idea/
 *.ckpt
