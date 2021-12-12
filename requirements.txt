@@ -9,3 +9,4 @@ python-dotenv
 opencv-python
 torchvision
 shapely
+wandb
