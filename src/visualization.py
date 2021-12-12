@@ -24,7 +24,7 @@ def put_mask_on_image(image: torch.Tensor, masks: np.ndarray) -> np.ndarray:
     return image_with_mask
 
 
-def plot_two_masks(image: np.ndarray, predicted_mask: np.ndarray, true_mask: np.ndarray, 
+def plot_two_masks(image: torch.Tensor, predicted_mask: np.ndarray, true_mask: np.ndarray,
                    color=(255, 255, 0), filename=None):
     image_mask1 = put_mask_on_image(image, predicted_mask)
     image_mask2 = put_mask_on_image(image, true_mask)
@@ -38,7 +38,8 @@ def plot_two_masks(image: np.ndarray, predicted_mask: np.ndarray, true_mask: np.
     else:
         plt.savefig(filename, dpi=80)
 
-def plot_mask_bbox(image: torch.Tensor, boxes, masks, figure_scale: int=15):
+
+def plot_mask_bbox(image: torch.Tensor, boxes: np.array, masks: np.array, figure_scale: int = 15):
     """Visualization instance of dataset after augmentation
 
     Args:
@@ -46,12 +47,13 @@ def plot_mask_bbox(image: torch.Tensor, boxes, masks, figure_scale: int=15):
         boxes: torch.Tensor with shape [N, 4] with N being number of boxes
         masks: torch.Tensor with shape [N, height, width]
     """
-    image_with_mask = put_mask_on_image(image, masks.numpy())
+    image_with_mask = put_mask_on_image(image, masks)
 
     # Drawing red rectangle for each instances
     red_color = (255, 0, 0)
     for x1, y1, x2, y2 in boxes:
-        image_with_mask = cv2.rectangle(image_with_mask.copy(), pt1=(int(x1), int(y1)), pt2=(int(x2), int(y2)), color=red_color, thickness=2)
+        image_with_mask = cv2.rectangle(image_with_mask.copy(), pt1=(int(x1), int(y1)), pt2=(int(x2), int(y2)),
+                                        color=red_color, thickness=2)
 
     plt.figure(figsize=(figure_scale, figure_scale))
     plt.imshow(image_with_mask)

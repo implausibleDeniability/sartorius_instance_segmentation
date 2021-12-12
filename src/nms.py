@@ -36,7 +36,7 @@ def polygon_iou(polygon1: Polygon, polygon2: Polygon):
     return iou
 
 
-def nms_polygons(polygons: np.array, scores: np.array, iou_threshold: float) -> np.array:
+def polygons_nms(polygons: np.array, scores: np.array, iou_threshold: float) -> np.array:
     """ Apply nms to polygons, returns flags, which polygons to leave"""
 
     indices = sorted(range(len(scores)), key=lambda k: -scores[k])
@@ -76,5 +76,5 @@ def mask_suppression(masks: np.array, scores: np.array, nms_threshold: float):
 
     polygons = list(map(lambda mask: Polygon(measure.find_contours(image=mask)[0]), masks))
     polygons = np.asarray(polygons)
-    indices = nms_polygons(polygons, scores, iou_threshold=nms_threshold)
+    indices = polygons_nms(polygons, scores, iou_threshold=nms_threshold)
     return masks[indices]
