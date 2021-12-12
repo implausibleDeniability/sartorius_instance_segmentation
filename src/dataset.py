@@ -56,8 +56,8 @@ class CellDataset(Dataset):
         iscrowd = torch.zeros((len(masks),), dtype=torch.int64)
 
         target = {
-            'masks': torch.as_tensor(masks),
-            'labels': torch.as_tensor(labels, dtype=torch.int64),
+            'masks': torch.as_tensor(np.array(masks)),
+            'labels': torch.as_tensor(np.array(labels), dtype=torch.int64),
             'boxes': torch.as_tensor(boxes, dtype=torch.float32),
             'iscrowd': iscrowd,
             'area': torch.as_tensor(area),
