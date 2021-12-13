@@ -10,3 +10,6 @@ opencv-python
 torchvision
 shapely
 wandb
+pycocotools
+imagecodecs
+imagecodecs-lite
