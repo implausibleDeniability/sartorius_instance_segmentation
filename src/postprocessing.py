@@ -45,15 +45,15 @@ def postprocess_predictions(outputs: list[dict],
 
     result = []
     for output in outputs:
-
+        
         scores = output['scores'].detach().cpu()
         masks = output['masks'].detach().cpu().squeeze()
         boxes = output['boxes'].detach().cpu()
-
+        
         masks = (masks >= mask_threshold).int()
 
         # Now some masks can be empty (all zeros), we need to exclude them
-        indices = [torch.sum(mask) > 0 for mask in masks]
+        indices = torch.as_tensor([torch.sum(mask) > 0 for mask in masks])
         masks, boxes, scores = masks[indices], boxes[indices], scores[indices]
 
         if score_threshold:
@@ -63,7 +63,7 @@ def postprocess_predictions(outputs: list[dict],
         if nms_threshold:
             indices = nms(boxes=boxes, scores=scores, iou_threshold=nms_threshold)
             masks, boxes, scores = masks[indices], boxes[indices], scores[indices]
-
+        
         non_overlapping_masks = remove_overlapping_pixels(masks.numpy())
         assert np.max(np.sum(non_overlapping_masks, axis=0)) <= 1, "Masks overlap"
 
