@@ -9,7 +9,9 @@ python-dotenv
 opencv-python
 torchvision
 shapely
+
 wandb
+rasterio
 pycocotools
 imagecodecs
 imagecodecs-lite
