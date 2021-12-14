@@ -1,6 +1,8 @@
 import os
 
 import numpy as np
+import random
+import torch
 from dotenv import load_dotenv
 
 
@@ -29,3 +31,12 @@ def get_box(mask: np.array) -> list:
     ymin = np.min(y_coords)
     ymax = np.max(y_coords)
     return [xmin, ymin, xmax, ymax]
+
+
+def make_deterministic(seed):
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
