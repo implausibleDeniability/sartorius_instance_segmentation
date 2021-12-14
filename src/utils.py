@@ -40,3 +40,14 @@ def make_deterministic(seed):
     torch.cuda.manual_seed_all(seed)
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
+    
+
+def images2device(images, device):
+    images = list(image.to(device) for image in images)
+    return images
+
+def targets2device(targets, device):
+    targets = [
+        {key: value.to(device) for key, value in target.items()} for target in targets
+    ]
+    return targets

@@ -16,7 +16,7 @@ from torchvision import models
 from src.dataset import CellDataset
 from src.postprocessing import postprocess_predictions
 from src.augmentations import train_transform
-from src.utils import make_deterministic
+from src.utils import make_deterministic, images2device, targets2device
 
 
 def main():
@@ -83,21 +83,9 @@ def main():
     )
 
 
-def images_to_device(images):
-    images = list(image.to(device) for image in images)
-    return images
-
-
-def targets_to_device(targets):
-    targets = [
-        {key: value.to(device) for key, value in target.items()} for target in targets
-    ]
-    return targets
-
-
 def train_batch(model, images, targets, optimizer):
     optimizer.zero_grad()
-    images, targets = images_to_device(images), targets_to_device(targets)
+    images, targets = images2device(images, device), targets2device(targets, device)
     output = model(images, targets)
     loss = sum(single_loss for single_loss in output.values())
     loss.backward()
