@@ -29,7 +29,7 @@ def compute_iou(labels, y_pred):
 
     # Compute union
     union = area_true + area_pred - intersection
-    iou = intersection / union
+    iou = intersection / (union + 1e-6)
 
     return iou[1:, 1:]  # exclude background
 
