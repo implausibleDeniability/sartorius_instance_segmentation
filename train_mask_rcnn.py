@@ -18,10 +18,10 @@ from src.utils import make_deterministic, images2device, targets2device
 def main():
     load_dotenv()
     make_deterministic(seed=42)
-    current_dir = Path(".")  # In my case, it is sartorius_instance_segmentation
     # TODO: folder 'experiments' that contain all possible configurations
     config = EasyDict(
         dataset_path=Path(os.environ["dataset_path"]),
+        weights_path=Path(os.environ["weights_path"]),
         device="cuda:1",
         val_size=0.2,
         batch_size=6,
@@ -73,9 +73,9 @@ def main():
     )
 
     # Save weights
-    weights_dir = current_dir / "weights"
+    weights_dir = config.weights_path
     weights_dir.mkdir(exist_ok=True)
-    weights_path = weights_dir / f"maskrcnn-{experiment_name}-{datetime.now().__str__()[:-7]}.ckpt"
+    weights_path = weights_dir / f"{experiment_name}-{datetime.now().__str__()[:-7]}.ckpt"
     torch.save(model.state_dict(), weights_path)
     wandb.save(str(weights_path.absolute()))
 
