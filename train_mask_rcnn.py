@@ -57,7 +57,7 @@ def main():
     )
 
     # Training
-    model = models.detection.maskrcnn_resnet50_fpn(num_classes=2, progress=False)
+    model = models.detection.maskrcnn_resnet50_fpn(num_classes=2, progress=False, box_detections_per_img=500)
     model.to(device)
     optimizer = torch.optim.Adam(model.parameters())
     scheduler = torch.optim.lr_scheduler.OneCycleLR(
