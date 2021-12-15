@@ -1,21 +1,17 @@
 import os
 from datetime import datetime
-
-import numpy as np
-import wandb
-from tqdm import tqdm
 from pathlib import Path
-from easydict import EasyDict
-from time import time
-from dotenv import load_dotenv
 
 import torch
+from dotenv import load_dotenv
+from easydict import EasyDict
 from torch.utils.data import DataLoader
 from torchvision import models
+from tqdm import tqdm
 
-from src.dataset import CellDataset
-from src.postprocessing import postprocess_predictions
+import wandb
 from src.augmentations import train_transform
+from src.dataset import CellDataset
 from src.utils import make_deterministic, images2device, targets2device
 
 
@@ -23,15 +19,6 @@ def main():
     load_dotenv()
     make_deterministic(seed=42)
     current_dir = Path(".")  # In my case, it is sartorius_instance_segmentation
-
-    # configuration
-    experiment_name = "temp"
-    wandb.init(
-        project="sartorius_instance_segmentation",
-        entity="implausible_denyability",
-        name=experiment_name,
-    )
-
     # TODO: folder 'experiments' that contain all possible configurations
     config = EasyDict(
         dataset_path=Path(os.environ["dataset_path"]),
@@ -44,6 +31,16 @@ def main():
         score_threshold=0.2,
         nms_threshold=None,
     )
+
+    # configuration
+    experiment_name = "temp"
+    wandb.init(
+        project="sartorius_instance_segmentation",
+        entity="implausible_denyability",
+        name=experiment_name,
+        config=config,
+    )
+
     global device
     device = config.device
 
@@ -58,6 +55,7 @@ def main():
 
     # Training
     model = models.detection.maskrcnn_resnet50_fpn(num_classes=2, progress=False, box_detections_per_img=500)
+    wandb.watch(model, log_freq=100)
     model.to(device)
     optimizer = torch.optim.Adam(model.parameters())
     scheduler = torch.optim.lr_scheduler.OneCycleLR(
@@ -77,10 +75,9 @@ def main():
     # Save weights
     weights_dir = current_dir / "weights"
     weights_dir.mkdir(exist_ok=True)
-    torch.save(
-        model.state_dict(),
-        weights_dir / f"maskrcnn-{experiment_name}-{datetime.now().__str__()}.ckpt",
-    )
+    weights_path = weights_dir / f"maskrcnn-{experiment_name}-{datetime.now().__str__()[:-7]}.ckpt"
+    torch.save(model.state_dict(), weights_path)
+    wandb.save(str(weights_path.absolute()))
 
 
 def train_batch(model, images, targets, optimizer):
