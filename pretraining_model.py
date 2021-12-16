@@ -34,6 +34,9 @@ def main():
         score_threshold=0.1,
         nms_threshold=None,
     )
+    pretrain_dir = config.dataset_path / "LIVECell_dataset_2021"
+    config.images = pretrain_dir / "images"
+    config.train_annotations = pretrain_dir / "annotations" / "LIVECell" / "livecell_coco_train.json"
 
     # configuration
     experiment_name = "pretrain_on_coco"
