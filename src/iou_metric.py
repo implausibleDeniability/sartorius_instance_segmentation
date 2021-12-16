@@ -29,8 +29,8 @@ def compute_iou(labels, y_pred):
 
     # Compute union
     union = area_true + area_pred - intersection
+    # assert (np.abs(union) > 0.00001).all(), "Union has 0 cells"
     iou = intersection / (union + 1e-6)
-
     return iou[1:, 1:]  # exclude background
 
 
@@ -61,7 +61,7 @@ def precision_at(threshold, iou):
 
 def flatten_masks(masks: np.array):
     """Takes the array of binary masks, enumerates them and collect them in 2d mask"""
-    pred = np.zeros_like(masks[0], dtype=np.int64)
+    pred = np.zeros((masks.shape[1], masks.shape[2]), dtype=np.int64)
     for ii, mask in enumerate(masks):
         pred[mask == 1] = ii + 1
 
@@ -82,9 +82,9 @@ def iou_map(truth_masks: np.array, pred_masks: np.array, verbose=0):
     Returns:
         float: mAP.
     """
-    truths = flatten_masks(truth_masks)
-    preds = flatten_masks(pred_masks)
-    ious = [compute_iou(truth, pred) for truth, pred in zip(truths, preds)]
+    truth = flatten_masks(truth_masks)
+    pred = flatten_masks(pred_masks)
+    ious = [compute_iou(truth, pred)]
 
     # print(ious[0].shape)
 
