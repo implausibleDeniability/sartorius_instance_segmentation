@@ -96,8 +96,9 @@ def main():
 def training(model, optimizer, scheduler, epochs, train_loader, val_loader):
     for epoch in range(epochs):
         loss, mask_loss = train_epoch(model, train_loader, optimizer, scheduler)
-        train_iou = eval_epoch(model, train_loader)
-        val_iou = eval_epoch(model, val_loader)
+        if epoch % 7 == 0 or epoch + 5 > config.epochs:
+            train_iou = eval_epoch(model, train_loader)
+            val_iou = eval_epoch(model, val_loader)
         wandb.log(
             {
                 "train_loss": loss,
@@ -136,7 +137,7 @@ def eval_epoch(model, loader):
     model.eval()
     ious = []
     for batch_idx, (images, targets) in enumerate(tqdm(loader)):
-        if batch_idx > 21:
+        if batch_idx > 31:
             break
         images = images2device(images, config.device)
         outputs = model(images)
