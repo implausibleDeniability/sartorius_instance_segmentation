@@ -174,11 +174,11 @@ class COCODataset(Dataset):
             boxes = transformed['bboxes']
 
         target = {
-            'masks': torch.as_tensor(masks),
-            'boxes': torch.as_tensor(boxes, dtype=torch.float32),
+            'masks': torch.as_tensor(np.asarray(masks)),
+            'boxes': torch.as_tensor(np.asarray(boxes), dtype=torch.float32),
             'labels': torch.as_tensor([1] * len(masks), dtype=torch.int64),
             'iscrowd': torch.as_tensor([1] * len(masks), dtype=torch.int64),
-            'ares': torch.as_tensor(area)
+            'ares': torch.as_tensor(np.asarray(area)),
         }
 
         return image, target
