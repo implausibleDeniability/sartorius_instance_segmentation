@@ -11,7 +11,7 @@ from torchvision import models
 from tqdm import tqdm
 import wandb
 
-from src.augmentations import train_transform
+from src.augmentations import train_transform, wider_train_transform
 from src.dataset import CellDataset
 from src.postprocessing import postprocess_predictions
 from src.utils import make_deterministic, images2device, targets2device
@@ -27,18 +27,18 @@ def main():
     config = EasyDict(
         dataset_path=Path(os.environ["dataset_path"]),
         weights_path=Path(os.environ["weights_path"]),
-        device="cuda:0",
+        device="cuda:1",
         val_size=0.2,
         batch_size=4,
-        num_workers=40,
-        epochs=1,
-        mask_threshold=0.5,
-        score_threshold=0.2,
-        nms_threshold=None,
+        num_workers=25,
+        epochs=200,
+        mask_threshold=0.42,
+        score_threshold=0.49,
+        nms_threshold=0.32,
     )
 
     # configuration
-    experiment_name = "bsln500ep"
+    experiment_name = "bsln200ep_flips"
     wandb.init(
         project="sartorius_instance_segmentation",
         entity="implausible_denyability",
@@ -48,7 +48,7 @@ def main():
 
     # DataLoaders
     train_dataloader = DataLoader(
-        dataset=CellDataset(cfg=config, mode="train", transform=train_transform),
+        dataset=CellDataset(cfg=config, mode="train", transform=wider_train_transform),
         num_workers=config.num_workers,
         batch_size=config.batch_size,
         shuffle=True,
@@ -72,7 +72,8 @@ def main():
         optimizer,
         epochs=config.epochs,
         steps_per_epoch=len(train_dataloader),
-        max_lr=1e-3,
+        max_lr=3e-4,
+        pct_start=0.15,
     )
     training(
         model=model,
