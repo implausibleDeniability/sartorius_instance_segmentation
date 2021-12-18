@@ -19,7 +19,8 @@ from src.utils import make_deterministic, images2device, targets2device
 
 @click.command(name="Pretraining model on another dataset")
 @click.option("--device", type=str, required=True)
-def main(device: str):
+@click.option("--experiment-name", type=str, required=True)
+def main(device: str, experiment_name: str):
     assert device.startswith("cuda:") or device == "cpu"
     load_dotenv()
     make_deterministic(seed=42)
@@ -43,7 +44,6 @@ def main(device: str):
     config.train_annotations = pretrain_dir / "annotations" / "LIVECell" / "livecell_coco_train.json"
 
     # configuration
-    experiment_name = "pretrain_on_coco"
     wandb.init(
         project="sartorius_instance_segmentation",
         # entity="implausible_denyability",
