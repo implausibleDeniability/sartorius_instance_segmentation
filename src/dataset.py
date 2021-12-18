@@ -11,6 +11,7 @@ from rasterio.features import rasterize
 from shapely.geometry import Polygon
 from skimage import io
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder
 from torch.utils.data import Dataset
 
 from src.utils import annotation2mask, get_box
@@ -27,26 +28,35 @@ class CellDataset(Dataset):
         data_csv = data_csv[['id', 'annotation', 'cell_type']]
         data_csv = data_csv.groupby(['id', 'cell_type'])['annotation'].agg(lambda x: list(x)).reset_index()
 
+        # For mask rcnn, 0 encodes background, so we should add 1 for encoding in range [1, 3]
+        data_csv.cell_type = LabelEncoder().fit_transform(data_csv.cell_type) + 1
+
         # Now data_csv has 606 rows with 3 columns:
         # - id - id of image,
         # - cell_type - type of cell,
         # - annotation - list of rle strings
         if mode == 'train':
-            self.data_csv, _ = train_test_split(data_csv, test_size=cfg.val_size, random_state=0)
+            self.data_csv, _ = train_test_split(data_csv,
+                                                test_size=cfg.val_size,
+                                                random_state=0,
+                                                stratify=data_csv.cell_type)
         else:
-            _, self.data_csv = train_test_split(data_csv, test_size=cfg.val_size, random_state=0)
+            _, self.data_csv = train_test_split(data_csv,
+                                                test_size=cfg.val_size,
+                                                random_state=0,
+                                                stratify=data_csv.cell_type)
 
     def __getitem__(self, item):
         # TODO: Test how much time does .iloc take
         # if I (maxim) am not mistaken, that can be quite long
-        image_id, _, annotations = self.data_csv.iloc[item]
+        image_id, cell_type, annotations = self.data_csv.iloc[item]
         image_path = self.image_folder / (image_id + ".png")
         image = io.imread(str(image_path))
 
         # TODO: consider using rle_decode instead of annotation2mask
         masks = list(map(lambda line: annotation2mask(line), annotations))
         boxes = list(map(lambda mask: get_box(mask), masks))
-        labels = list(map(lambda _: 1, masks))
+        labels = list(map(lambda _: cell_type, masks))
 
         if self.transform:
             transformed = self.transform(image=image, masks=masks, bboxes=boxes, category_ids=labels)
@@ -54,6 +64,7 @@ class CellDataset(Dataset):
             image = transformed['image']
             masks = transformed['masks']
             boxes = transformed['bboxes']
+            labels = transformed['category_ids']
 
         boxes = np.asarray(boxes)
         area = (boxes[:, 3] - boxes[:, 1]) * (boxes[:, 2] - boxes[:, 0])
