@@ -4,18 +4,18 @@ from pathlib import Path
 
 import numpy as np
 import torch
+import wandb
 from dotenv import load_dotenv
 from easydict import EasyDict
 from torch.utils.data import DataLoader
 from torchvision import models
 from tqdm import tqdm
-import wandb
 
 from src.augmentations import train_transform, wider_train_transform
 from src.dataset import CellDataset
+from src.iou_metric import iou_map
 from src.postprocessing import postprocess_predictions
 from src.utils import make_deterministic, images2device, targets2device
-from src.iou_metric import iou_map
 
 
 def main():
@@ -63,7 +63,7 @@ def main():
 
     # Training
     model = models.detection.maskrcnn_resnet50_fpn(
-        num_classes=2, progress=False, box_detections_per_img=500
+        num_classes=4, progress=False, box_detections_per_img=500
     )
     wandb.watch(model, log_freq=100)
     model.to(config.device)
