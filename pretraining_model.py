@@ -34,10 +34,7 @@ def main(device: str, experiment_name: str):
         val_size=0.2,
         batch_size=4,
         num_workers=10,
-        epochs=20,
-        mask_threshold=0.5,
-        score_threshold=0.1,
-        nms_threshold=None,
+        epochs=20
     )
     pretrain_dir = config.dataset_path / "LIVECell_dataset_2021"
     config.images = pretrain_dir / "images"
