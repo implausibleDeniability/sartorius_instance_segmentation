@@ -31,7 +31,7 @@ def main(device: str, experiment_name: str):
         weights_path=Path(os.environ["weights_path"]),
         device=device,
         val_size=0.2,
-        batch_size=4,
+        batch_size=2,
         num_workers=10,
         epochs=20
     )
@@ -62,7 +62,7 @@ def main(device: str, experiment_name: str):
 
     # Training
     model = models.detection.maskrcnn_resnet50_fpn(
-        num_classes=2, progress=False, box_detections_per_img=500
+        num_classes=2, progress=False, box_detections_per_img=400
     )
     model.to(config.device)
     optimizer = torch.optim.Adam(model.parameters())
