@@ -25,7 +25,6 @@ def main(device: str, experiment_name: str):
     load_dotenv()
     make_deterministic(seed=42)
 
-    # TODO: folder 'experiments' that contain all possible configurations
     global config
     config = EasyDict(
         dataset_path=Path(os.environ["dataset_path"]),
@@ -65,7 +64,6 @@ def main(device: str, experiment_name: str):
     model = models.detection.maskrcnn_resnet50_fpn(
         num_classes=2, progress=False, box_detections_per_img=500
     )
-    wandb.watch(model, log_freq=100)
     model.to(config.device)
     optimizer = torch.optim.Adam(model.parameters())
     scheduler = torch.optim.lr_scheduler.OneCycleLR(
@@ -114,7 +112,7 @@ def train_epoch(model, loader, optimizer, scheduler):
         losses.append(loss)
         mask_losses.append(mask_loss)
         scheduler.step()
-    return np.mean(losses), np.mean(mask_loss)
+    return np.mean(losses), np.mean(mask_losses)
 
 
 def train_batch(model, images, targets, optimizer):
