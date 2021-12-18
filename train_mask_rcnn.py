@@ -31,14 +31,14 @@ def main():
         val_size=0.2,
         batch_size=4,
         num_workers=25,
-        epochs=200,
+        epochs=50,
         mask_threshold=0.42,
         score_threshold=0.49,
         nms_threshold=0.32,
     )
 
     # configuration
-    experiment_name = "bsln200ep_flips"
+    experiment_name = "bsln50ep_flips"
     wandb.init(
         project="sartorius_instance_segmentation",
         entity="implausible_denyability",
@@ -72,8 +72,7 @@ def main():
         optimizer,
         epochs=config.epochs,
         steps_per_epoch=len(train_dataloader),
-        max_lr=3e-4,
-        pct_start=0.15,
+        max_lr=1e-3,
     )
     training(
         model=model,
