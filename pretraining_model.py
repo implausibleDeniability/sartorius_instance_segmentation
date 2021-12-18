@@ -2,6 +2,7 @@ import os
 from datetime import datetime
 from pathlib import Path
 
+import click
 import numpy as np
 import torch
 import wandb
@@ -16,7 +17,10 @@ from src.dataset import COCODataset
 from src.utils import make_deterministic, images2device, targets2device
 
 
-def main():
+@click.command(name="Pretraining model on another dataset")
+@click.option("--device", type=str, required=True)
+def main(device: str):
+    assert device.startswith("cuda:") or device == "cpu"
     load_dotenv()
     make_deterministic(seed=42)
 
@@ -25,10 +29,10 @@ def main():
     config = EasyDict(
         dataset_path=Path(os.environ["dataset_path"]),
         weights_path=Path(os.environ["weights_path"]),
-        device="cuda:1",
+        device=device,
         val_size=0.2,
-        batch_size=2,
-        num_workers=15,
+        batch_size=4,
+        num_workers=10,
         epochs=20,
         mask_threshold=0.5,
         score_threshold=0.1,
