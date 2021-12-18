@@ -20,7 +20,7 @@ from src.iou_metric import iou_map
 def main():
     load_dotenv()
 
-    experiment_name = 'bsln500ep'
+    experiment_name = 'bsln200ep_flips'
     weights_name = f'{experiment_name}.ckpt'
     weights_path = Path(os.environ["weights_path"]) / weights_name
 
@@ -37,7 +37,7 @@ def main():
         nms_threshold=None,
     )
 
-    model = maskrcnn_resnet50_fpn(progress=False, num_classes=2)
+    model = maskrcnn_resnet50_fpn(progress=False, num_classes=2, box_detections_per_img=500)
     model.load_state_dict(torch.load(weights_path, map_location=torch.device(config.device)))
     model.to(config.device)
     model.eval()
