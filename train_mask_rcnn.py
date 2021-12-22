@@ -7,12 +7,14 @@ import torch
 import wandb
 from dotenv import load_dotenv
 from easydict import EasyDict
+from torch.optim.lr_scheduler import CyclicLR
 from torch.utils.data import DataLoader
 from torchvision import models
 from tqdm import tqdm
 
 from src.augmentations import train_transform, wider_train_transform
 from src.dataset import CellDataset
+from src.image_logger import ImageLogger
 from src.iou_metric import iou_map
 from src.postprocessing import postprocess_predictions
 from src.utils import make_deterministic, images2device, targets2device
@@ -38,7 +40,7 @@ def main():
     )
 
     # configuration
-    experiment_name = "bsln50ep_flips"
+    experiment_name = "cyclic_lr"
     wandb.init(
         project="sartorius_instance_segmentation",
         entity="implausible_denyability",
@@ -47,15 +49,18 @@ def main():
     )
 
     # DataLoaders
+    train_dataset = CellDataset(cfg=config, mode="train", transform=wider_train_transform)
     train_dataloader = DataLoader(
-        dataset=CellDataset(cfg=config, mode="train", transform=wider_train_transform),
+        dataset=train_dataset,
         num_workers=config.num_workers,
         batch_size=config.batch_size,
         shuffle=True,
         collate_fn=lambda x: tuple(zip(*x)),
     )
+
+    val_dataset = CellDataset(cfg=config, mode="val", transform=train_transform)
     val_dataloader = DataLoader(
-        dataset=CellDataset(cfg=config, mode="val", transform=train_transform),
+        dataset=val_dataset,
         num_workers=config.num_workers,
         batch_size=config.batch_size,
         collate_fn=lambda x: tuple(zip(*x)),
@@ -68,12 +73,14 @@ def main():
     wandb.watch(model, log_freq=100)
     model.to(config.device)
     optimizer = torch.optim.Adam(model.parameters())
-    scheduler = torch.optim.lr_scheduler.OneCycleLR(
-        optimizer,
-        epochs=config.epochs,
-        steps_per_epoch=len(train_dataloader),
-        max_lr=1e-3,
-    )
+    total_num_iterations = len(train_dataloader) * config.max_epochs
+    scheduler = CyclicLR(optimizer=optimizer,
+                         base_lr=1e-5,
+                         max_lr=1e-3,
+                         mode="triangular2",
+                         step_size_up=total_num_iterations / 7)
+
+    image_logger = ImageLogger(train_dataset=train_dataset, val_dataset=val_dataset, n_images=10)
     training(
         model=model,
         optimizer=optimizer,
@@ -81,22 +88,22 @@ def main():
         epochs=config.epochs,
         train_loader=train_dataloader,
         val_loader=val_dataloader,
+        image_logger=image_logger,
     )
 
     # Save weights
     weights_dir = config.weights_path
     weights_dir.mkdir(exist_ok=True)
-    weights_path = (
-        weights_dir / f"{experiment_name}-{datetime.now().__str__()[:-7]}.ckpt"
-    )
+    weights_path = weights_dir / f"{experiment_name}-{datetime.now().__str__()[:-7]}.ckpt"
     torch.save(model.state_dict(), weights_path)
     wandb.save(str(weights_path.absolute()))
 
 
-def training(model, optimizer, scheduler, epochs, train_loader, val_loader):
+def training(model, optimizer, scheduler, epochs, train_loader, val_loader, image_logger):
     for epoch in range(epochs):
         loss, mask_loss = train_epoch(model, train_loader, optimizer, scheduler)
         if epoch % 7 == 0 or epoch + 5 > config.epochs:
+            image_logger.log_images(model)
             train_iou = eval_epoch(model, train_loader)
             val_iou = eval_epoch(model, val_loader)
         wandb.log(
@@ -119,7 +126,7 @@ def train_epoch(model, loader, optimizer, scheduler):
         losses.append(loss)
         mask_losses.append(mask_loss)
         scheduler.step()
-    return np.mean(losses), np.mean(mask_loss)
+    return np.mean(losses), np.mean(mask_losses)
 
 
 def train_batch(model, images, targets, optimizer):
