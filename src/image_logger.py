@@ -1,6 +1,7 @@
 import numpy as np
 import torch
 import wandb
+from pytorch_toolbelt.utils import to_numpy
 from skimage import color
 from torch import nn
 from torch.utils.data import Dataset
@@ -52,9 +53,9 @@ class ImageLogger:
             image = tensor_to_image(image).squeeze()
             image = color.gray2rgb(image)
 
-            pred_masks = pred['masks'].numpy().squeeze()
+            pred_masks = to_numpy(pred['masks']).squeeze()
             pred_masks = (pred_masks > 0.5).astype(int)
-            true_masks = target['masks'].numpy().squeeze()
+            true_masks = to_numpy(target['masks']).squeeze()
 
             for mask in true_masks:
                 image = apply_mask(image, mask, self.true_color)
