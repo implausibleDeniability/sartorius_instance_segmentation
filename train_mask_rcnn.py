@@ -80,7 +80,7 @@ def main():
                          mode="triangular2",
                          step_size_up=total_num_iterations / 7)
 
-    image_logger = ImageLogger(train_dataset=train_dataset, val_dataset=val_dataset, n_images=10)
+    image_logger = ImageLogger(train_dataset=train_dataset, val_dataset=val_dataset, n_images=10, device=config.device)
     training(
         model=model,
         optimizer=optimizer,

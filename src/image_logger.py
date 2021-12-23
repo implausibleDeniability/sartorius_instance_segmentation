@@ -5,6 +5,7 @@ from skimage import color
 from torch import nn
 from torch.utils.data import Dataset
 
+from src.utils import images2device, targets2device
 from src.visualization import tensor_to_image
 
 
@@ -26,9 +27,11 @@ class ImageLogger:
     def __init__(self,
                  train_dataset: Dataset,
                  val_dataset: Dataset,
+                 device: str,
                  n_images: int):
         self.train_dataset = train_dataset
         self.val_dataset = val_dataset
+        self.device = device
 
         self.train_indices = np.random.choice(list(range(len(train_dataset))), size=n_images)
         self.val_indices = np.random.choice(list(range(len(val_dataset))), size=n_images)
@@ -40,6 +43,8 @@ class ImageLogger:
         images = []
         for ii in indices:
             image, target = dataset[ii]
+            image = images2device(image, self.device)
+            target = targets2device(target, self.device)
 
             with torch.no_grad():
                 pred = model.forward([image])[0]
