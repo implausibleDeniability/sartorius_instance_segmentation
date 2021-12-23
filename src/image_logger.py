@@ -43,11 +43,11 @@ class ImageLogger:
         images = []
         for ii in indices:
             image, target = dataset[ii]
-            image = images2device(image, self.device)
-            target = targets2device(target, self.device)
+            images = images2device([image], self.device)
+            targets = targets2device([target], self.device)
 
             with torch.no_grad():
-                pred = model.forward([image])[0]
+                pred = model.forward(images)[0]
 
             image = tensor_to_image(image).squeeze()
             image = color.gray2rgb(image)
