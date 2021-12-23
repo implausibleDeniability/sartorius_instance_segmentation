@@ -65,13 +65,13 @@ class ImageLogger:
 
             images.append(image)
 
-        return images
+        return np.concatenate(images, axis=1)
 
     def log_images(self, model: nn.Module):
         model.eval()
 
         train_samples = self.make_predictions(model, self.train_indices, self.train_dataset)
-        wandb.log({"train/predictions": [wandb.Image(image) for image in train_samples]})
+        wandb.log({"train/predictions": wandb.Image(train_samples, caption="Red is predictions, yellow is labels")})
 
         val_samples = self.make_predictions(model, self.val_indices, self.val_dataset)
-        wandb.log({"val/predictions": [wandb.Image(image) for image in val_samples]})
+        wandb.log({"val/predictions": wandb.Image(val_samples, caption="Red is predictions, yellow is labels")})
