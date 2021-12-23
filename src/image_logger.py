@@ -1,11 +1,11 @@
 import numpy as np
 import torch
-import tqdm
 import wandb
 from pytorch_toolbelt.utils import to_numpy
 from skimage import color
 from torch import nn
 from torch.utils.data import Dataset
+from tqdm import tqdm
 
 from src.utils import images2device
 from src.visualization import tensor_to_image
@@ -43,7 +43,7 @@ class ImageLogger:
 
     def make_predictions(self, model, indices, dataset):
         images = []
-        for ii in tqdm.tqdm(indices, desc="Logging train/val images"):
+        for ii in tqdm(indices, desc="Logging train/val images"):
             image, target = dataset[ii]
             images = images2device([image], self.device)
 
