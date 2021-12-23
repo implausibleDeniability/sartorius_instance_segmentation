@@ -82,7 +82,8 @@ def main(device: str, exp_name: str):
                          base_lr=1e-5,
                          max_lr=1e-3,
                          mode="triangular2",
-                         step_size_up=total_num_iterations / 7)
+                         step_size_up=total_num_iterations / 7,
+                         cycle_momentum=False)
 
     image_logger = ImageLogger(train_dataset=train_dataset, val_dataset=val_dataset, n_images=10, device=config.device)
     training(
