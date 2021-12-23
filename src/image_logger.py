@@ -42,7 +42,7 @@ class ImageLogger:
         self.pred_color = (1, 0, 0)
 
     def make_predictions(self, model, indices, dataset):
-        images = []
+        log_images = []
         for ii in tqdm(indices, desc="Logging train/val images"):
             image, target = dataset[ii]
             images = images2device([image], self.device)
@@ -63,9 +63,9 @@ class ImageLogger:
             for mask in pred_masks:
                 image = apply_mask(image, mask, self.pred_color)
 
-            images.append(image)
+            log_images.append(image)
 
-        return np.concatenate(images, axis=1)
+        return np.concatenate(log_images, axis=1)
 
     def log_images(self, model: nn.Module):
         model.eval()
