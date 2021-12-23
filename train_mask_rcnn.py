@@ -77,7 +77,7 @@ def main(device: str, exp_name: str):
     wandb.watch(model, log_freq=100)
     model.to(config.device)
     optimizer = torch.optim.Adam(model.parameters())
-    total_num_iterations = len(train_dataloader) * config.max_epochs
+    total_num_iterations = len(train_dataloader) * config.epochs
     scheduler = CyclicLR(optimizer=optimizer,
                          base_lr=1e-5,
                          max_lr=1e-3,
