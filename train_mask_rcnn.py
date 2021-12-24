@@ -8,7 +8,6 @@ import torch
 import wandb
 from dotenv import load_dotenv
 from easydict import EasyDict
-from torch.optim.lr_scheduler import CyclicLR
 from torch.utils.data import DataLoader
 from torchvision import models
 from tqdm import tqdm
@@ -77,13 +76,12 @@ def main(device: str, exp_name: str):
     wandb.watch(model, log_freq=100)
     model.to(config.device)
     optimizer = torch.optim.Adam(model.parameters())
-    total_num_iterations = len(train_dataloader) * config.epochs
-    scheduler = CyclicLR(optimizer=optimizer,
-                         base_lr=1e-5,
-                         max_lr=1e-3,
-                         mode="triangular2",
-                         step_size_up=total_num_iterations / 7,
-                         cycle_momentum=False)
+    scheduler = torch.optim.lr_scheduler.OneCycleLR(
+        optimizer,
+        epochs=config.epochs,
+        steps_per_epoch=len(train_dataloader),
+        max_lr=1e-3,
+    )
 
     image_logger = ImageLogger(train_dataset=train_dataset, val_dataset=val_dataset, n_images=10, device=config.device)
     training(
