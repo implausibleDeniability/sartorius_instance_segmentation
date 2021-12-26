@@ -19,8 +19,14 @@ from sklearn.model_selection import StratifiedKFold
 
 from datasets import CellDataLoader
 from finetuning_parameters.datasets import read_train_data
-from src.augmentations import wider_train_transform
 from training_loop import CellInstanceSegmentation
+
+wider_train_transform = A.Compose([
+    A.HorizontalFlip(p=0.5),
+    A.VerticalFlip(p=0.5),
+    A.Normalize(mean=(0.485,), std=(0.229,)),
+    ToTensorV2(),
+], bbox_params=A.BboxParams(format='pascal_voc', label_fields=['category_ids']))
 
 load_dotenv()
 

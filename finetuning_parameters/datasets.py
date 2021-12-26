@@ -5,12 +5,17 @@ import numpy as np
 import pandas as pd
 import pytorch_lightning as pl
 import torch
+from albumentations.pytorch import ToTensorV2
 from skimage import io
 from sklearn.preprocessing import LabelEncoder
 from torch.utils.data import Dataset, DataLoader
 
-from src.augmentations import default_transform
 from src.utils import annotation2mask, get_box
+
+default_transform = A.Compose([
+    A.Normalize(mean=(0.485,), std=(0.229,)),
+    ToTensorV2(),
+], bbox_params=A.BboxParams(format='pascal_voc', label_fields=['category_ids']))
 
 
 def read_train_data(dataset_path: Path):
