@@ -36,7 +36,10 @@ class CellDataset(Dataset):
         # - cell_type - type of cell,
         # - annotation - list of rle strings
         if mode == 'train':
-            self.data_csv, _ = train_test_split(data_csv,
+            if cfg.val_size == 0:
+                self.data_csv = data_csv
+            else:
+                self.data_csv, _ = train_test_split(data_csv,
                                                 test_size=cfg.val_size,
                                                 random_state=0,
                                                 stratify=data_csv.cell_type)

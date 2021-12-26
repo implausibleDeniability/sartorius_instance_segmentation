@@ -33,8 +33,8 @@ def main(device: str, exp_name: str):
         dataset_path=Path(os.environ["dataset_path"]),
         weights_path=Path(os.environ["weights_path"]),
         device=device,
+        val_size=0.2,
         batch_size=4,
-        val_size=0.0,
         num_workers=25,
         epochs=50,
         mask_threshold=0.42,
@@ -60,7 +60,14 @@ def main(device: str, exp_name: str):
         shuffle=True,
         collate_fn=lambda x: tuple(zip(*x)),
     )
-    val_dataloader = None
+
+    val_dataset = CellDataset(cfg=config, mode="val", transform=train_transform)
+    val_dataloader = DataLoader(
+        dataset=val_dataset,
+        num_workers=config.num_workers,
+        batch_size=config.batch_size,
+        collate_fn=lambda x: tuple(zip(*x)),
+    )
 
     # Training
     model = models.detection.maskrcnn_resnet50_fpn(
@@ -73,9 +80,10 @@ def main(device: str, exp_name: str):
         optimizer,
         epochs=config.epochs,
         steps_per_epoch=len(train_dataloader),
-        max_lr=3e-4,
+        max_lr=1e-3,
     )
 
+    image_logger = ImageLogger(train_dataset=train_dataset, val_dataset=val_dataset, n_images=10, device=config.device)
     training(
         model=model,
         optimizer=optimizer,
@@ -83,6 +91,7 @@ def main(device: str, exp_name: str):
         epochs=config.epochs,
         train_loader=train_dataloader,
         val_loader=val_dataloader,
+        image_logger=image_logger,
     )
 
     # Save weights
@@ -93,15 +102,19 @@ def main(device: str, exp_name: str):
     wandb.save(str(weights_path.absolute()))
 
 
-def training(model, optimizer, scheduler, epochs, train_loader, val_loader):
+def training(model, optimizer, scheduler, epochs, train_loader, val_loader, image_logger):
     for epoch in range(epochs):
         loss, mask_loss = train_epoch(model, train_loader, optimizer, scheduler)
-        # if epoch % 7 == 0 or epoch + 5 > config.epochs:
-        #     train_iou = eval_epoch(model, train_loader)
+        if epoch % 7 == 0 or epoch + 5 > config.epochs:
+            image_logger.log_images(model)
+            train_iou = eval_epoch(model, train_loader)
+            val_iou = eval_epoch(model, val_loader)
         wandb.log(
             {
                 "train_loss": loss,
                 "train_mask_loss": mask_loss,
+                "train_iou": train_iou,
+                "val_iou": val_iou,
                 "lr": scheduler.get_last_lr()[0],
             }
         )
