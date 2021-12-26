@@ -4,6 +4,7 @@ torch_test.ipynb
 data/
 imagelogs/
 wandb/
+mmdetection/
 *.zip
 .idea/
 *.ckpt
