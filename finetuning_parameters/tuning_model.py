@@ -1,4 +1,5 @@
 import os
+import pickle
 from pathlib import Path
 
 import click
@@ -6,10 +7,12 @@ import numpy as np
 import optuna
 import pandas as pd
 import pytorch_lightning as pl
+import wandb
 import yaml
 from dotenv import load_dotenv
 from easydict import EasyDict
 from optuna import Trial
+from optuna.visualization import plot_optimization_history, plot_param_importances, plot_contour
 from pytorch_lightning.callbacks import LearningRateMonitor
 from pytorch_lightning.loggers import WandbLogger
 from sklearn.model_selection import StratifiedKFold
@@ -87,6 +90,25 @@ def main(dataset_path: str, device: str, batch_size: int, num_workers: int, epoc
 
     study = optuna.create_study(direction="maximize")
     study.optimize(lambda trial: objective(trial, data, parameters, config), n_trials=1)
+
+    saving_dir = Path(".") / "tuning_parameters"
+    saving_dir.mkdir()
+    with open(saving_dir / "optuna_logs.pickle", "wb") as file:
+        pickle.dump(study, file)
+
+    study.trials_dataframe().to_csv(saving_dir / "exp_data.csv", index=False)
+
+    fig = plot_optimization_history(study)
+    fig.write_image(saving_dir / "opt_history.jpg", scale=2)
+    wandb.save(saving_dir / "opt_history.jpg")
+
+    fig = plot_contour(study)
+    fig.write_image(saving_dir / "contour.jpg", scale=2)
+    wandb.save(saving_dir / "contour.jpg")
+
+    fig = plot_param_importances(study)
+    fig.write_image(saving_dir / "param_importance.jpg", scale=2)
+    wandb.save(saving_dir / "param_importance.jpg")
 
 
 if __name__ == '__main__':
