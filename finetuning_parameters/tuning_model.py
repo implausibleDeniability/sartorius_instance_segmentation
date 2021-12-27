@@ -81,7 +81,7 @@ def objective(trial: Trial, data: pd.DataFrame, parameters: dict, cfg: EasyDict)
 @click.option('--epochs', type=int, default=50)
 @click.option("--token", type=str, default="", help="WANDB_API_KEY")
 def main(dataset_path: str, device: str, batch_size: int, num_workers: int, epochs: int, token: str):
-    device = 0 if device == "cpu" else int(device[-1])
+    device = 0 if device == "cpu" else [int(device[-1])]
 
     if token:
         os.environ['WANDB_API_KEY'] = token
