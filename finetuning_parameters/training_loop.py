@@ -14,13 +14,15 @@ from src.postprocessing import postprocess_predictions
 
 
 class CellInstanceSegmentation(pl.LightningModule):
-    def __init__(self, cfg: EasyDict):
+    def __init__(self, cfg: EasyDict, val_dataloader):
         super(CellInstanceSegmentation, self).__init__()
 
         self.model = maskrcnn_resnet50_fpn(num_classes=4,
                                            progress=False,
                                            box_detections_per_img=500,
                                            trainable_backbone_layers=5)
+
+        self.val_dataloader = val_dataloader
         self.cfg = cfg
 
     def _shared_step(self, batch):
@@ -62,11 +64,8 @@ class CellInstanceSegmentation(pl.LightningModule):
     def test_step(self, batch):
         pass
 
-    def test_epoch_end(self, outputs) -> None:
-        pass
-
     def on_test_end(self) -> None:
-        iou_score = self.calculate_iou(dataloader=self.train_dataloader)
+        iou_score = self.calculate_iou(dataloader=self.val_dataloader)
         self.log("test/iou_score", torch.as_tensor(iou_score).item())
 
     def configure_optimizers(self):
