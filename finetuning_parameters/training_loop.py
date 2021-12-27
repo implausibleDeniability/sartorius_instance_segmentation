@@ -91,6 +91,7 @@ class CellInstanceSegmentation(pl.LightningModule):
                 break
 
             images, targets = batch
+            images = [image.to(self.device) for image in images]
 
             predictions = self.model(images)
             processed_outputs = postprocess_predictions(
