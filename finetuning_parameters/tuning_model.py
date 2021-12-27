@@ -59,8 +59,7 @@ def objective(trial: Trial, data: pd.DataFrame, parameters: dict, cfg: EasyDict)
                              name=f"lr={lr},optim={optimizer_name},sched={scheduler_name},kfold={ii}")
         lr_monitor = LearningRateMonitor(logging_interval='step')
 
-        model = CellInstanceSegmentation(cfg=EasyDict(hparams, steps_per_epochs=len(train_dataloader)),
-                                         val_dataloader=val_dataloader)
+        model = CellInstanceSegmentation(cfg=EasyDict(hparams, steps_per_epochs=len(train_dataloader)))
 
         trainer = pl.Trainer(logger=logger,
                              max_epochs=cfg.epochs,
