@@ -61,7 +61,7 @@ class CellInstanceSegmentation(pl.LightningModule):
         self.log("val/loss_epoch", loss_epoch.item())
         self.log("val/loss_mask_epoch", loss_mask_epoch.item())
 
-    def test_step(self, batch):
+    def test_step(self, batch, batch_idx):
         pass
 
     def on_test_end(self) -> None:
