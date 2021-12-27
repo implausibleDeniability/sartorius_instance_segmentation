@@ -31,7 +31,7 @@ class CellInstanceSegmentation(pl.LightningModule):
         loss_step = sum(loss for loss in outputs.values())
         loss_mask = outputs['loss_mask'].item()
 
-        return {"loss": loss_step, "loss_mask": loss_mask}
+        return {"loss": loss_step, "loss_step": loss_step.item(), "loss_mask": loss_mask}
 
     def training_step(self, batch, batch_idx):
         outputs = self._shared_step(batch)
