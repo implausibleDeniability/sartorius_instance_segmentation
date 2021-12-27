@@ -36,7 +36,7 @@ def get_scheduler(name: str, optimizer: Optimizer, **kwargs):
         return StepLR(optimizer, step_size=epochs // 3, gamma=0.1)
 
     elif name == 'ReduceLROnPlateau':
-        return ReduceLROnPlateau(optimizer, mode='min')
+        return {"scheduler": ReduceLROnPlateau(optimizer, mode='min', factor=0.2), "monitor": "val/loss_epoch"}
 
     else:
         raise NotImplemented("{name} is not implemented!")

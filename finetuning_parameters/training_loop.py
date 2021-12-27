@@ -79,7 +79,7 @@ class CellInstanceSegmentation(pl.LightningModule):
                                   epochs=self.cfg.epochs,
                                   lr=self.cfg.lr)
 
-        return {"optimizer": optimizer, "scheduler": scheduler, "monitor": "val/loss_epoch"}
+        return optimizer, scheduler
 
     def calculate_iou(self, dataloader):
         self.model.eval()
