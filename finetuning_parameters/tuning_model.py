@@ -50,11 +50,10 @@ def objective(trial: Trial, data: pd.DataFrame, parameters: dict, cfg: EasyDict)
 
     hparams = cfg.__dict__ | dict(lr=lr, optimizer_name=optimizer_name, scheduler_name=scheduler_name)
 
-    Path("../logs").mkdir(exist_ok=True)
     logger = WandbLogger(project="sartorius_instance_segmentation",
                          config=hparams,
                          name=f"tune?lr={lr},optim={optimizer_name},sched={scheduler_name}",
-                         save_dir=Path("../logs").__str__())
+                         save_dir=Path("logs").__str__())
     lr_monitor = LearningRateMonitor(logging_interval='step')
 
     model = CellInstanceSegmentation(cfg=EasyDict(hparams, steps_per_epochs=len(train_dataloader)),
@@ -80,6 +79,9 @@ def objective(trial: Trial, data: pd.DataFrame, parameters: dict, cfg: EasyDict)
 @click.option('--epochs', type=int, default=50)
 @click.option("--token", type=str, default="", help="WANDB_API_KEY")
 def main(dataset_path: str, device: str, batch_size: int, num_workers: int, epochs: int, token: str):
+    saving_dir = Path("logs")
+    saving_dir.mkdir()
+
     device = 0 if device == "cpu" else [int(device[-1])]
 
     if token:
@@ -104,11 +106,10 @@ def main(dataset_path: str, device: str, batch_size: int, num_workers: int, epoc
         nms_threshold=None,
     )
 
-    study = optuna.create_study(direction="maximize", storage='sqlite:///tuning_parameters.db', load_if_exists=True)
+    study = optuna.create_study(direction="maximize", storage='sqlite:///logs/tuning_parameters.db',
+                                load_if_exists=True)
     study.optimize(lambda trial: objective(trial, data, parameters, config), n_trials=1)
 
-    saving_dir = Path(".") / "tuning_parameters"
-    saving_dir.mkdir()
     with open(saving_dir / "optuna_logs.pickle", "wb") as file:
         pickle.dump(study, file)
 
