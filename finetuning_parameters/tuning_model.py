@@ -63,6 +63,7 @@ def objective(trial: Trial, data: pd.DataFrame, parameters: dict, cfg: EasyDict)
                                          val_dataloader=val_dataloader)
 
         trainer = pl.Trainer(logger=logger,
+                             max_epochs=cfg.epochs,
                              callbacks=[lr_monitor],
                              gpus=cfg.device,
                              fast_dev_run=True)
