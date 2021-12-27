@@ -90,7 +90,6 @@ def main(dataset_path: str, device: str, batch_size: int, num_workers: int, epoc
     with open("params.yaml") as file:
         config = yaml.safe_load(file)
 
-    n_splits = config['k_folds']
     parameters = config['parameters']
     data = read_train_data(Path(dataset_path))
 
@@ -100,7 +99,6 @@ def main(dataset_path: str, device: str, batch_size: int, num_workers: int, epoc
         batch_size=batch_size,
         num_workers=num_workers,
         epochs=epochs,
-        n_splits=n_splits,
         mask_threshold=0.5,
         score_threshold=0.05,
         nms_threshold=None,
@@ -108,7 +106,7 @@ def main(dataset_path: str, device: str, batch_size: int, num_workers: int, epoc
 
     study = optuna.create_study(direction="maximize", storage='sqlite:///logs/tuning_parameters.db',
                                 load_if_exists=True)
-    study.optimize(lambda trial: objective(trial, data, parameters, config), n_trials=1)
+    study.optimize(lambda trial: objective(trial, data, parameters, config), n_trials=20)
 
     with open(saving_dir / "optuna_logs.pickle", "wb") as file:
         pickle.dump(study, file)

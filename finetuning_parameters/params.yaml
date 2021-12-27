@@ -1,4 +1,3 @@
-k_folds: 5
 parameters:
   lr:
     min: 0.00001
