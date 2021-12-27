@@ -19,8 +19,7 @@ class CellInstanceSegmentation(pl.LightningModule):
 
         self.model = maskrcnn_resnet50_fpn(num_classes=4,
                                            progress=False,
-                                           box_detections_per_img=500,
-                                           trainable_backbone_layers=5)
+                                           box_detections_per_img=500)
 
         self.val_dataloader = val_dataloader
         self.cfg = cfg

@@ -50,9 +50,11 @@ def objective(trial: Trial, data: pd.DataFrame, parameters: dict, cfg: EasyDict)
 
     hparams = cfg.__dict__ | dict(lr=lr, optimizer_name=optimizer_name, scheduler_name=scheduler_name)
 
+    Path("../logs").mkdir(exist_ok=True)
     logger = WandbLogger(project="sartorius_instance_segmentation",
                          config=hparams,
-                         name=f"tune?lr={lr},optim={optimizer_name},sched={scheduler_name}")
+                         name=f"tune?lr={lr},optim={optimizer_name},sched={scheduler_name}",
+                         save_dir=Path("../logs").__str__())
     lr_monitor = LearningRateMonitor(logging_interval='step')
 
     model = CellInstanceSegmentation(cfg=EasyDict(hparams, steps_per_epochs=len(train_dataloader)),
