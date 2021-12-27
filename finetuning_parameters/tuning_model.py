@@ -2,6 +2,7 @@ import os
 import pickle
 from pathlib import Path
 
+import albumentations as A
 import click
 import numpy as np
 import optuna
@@ -9,6 +10,7 @@ import pandas as pd
 import pytorch_lightning as pl
 import wandb
 import yaml
+from albumentations.pytorch import ToTensorV2
 from dotenv import load_dotenv
 from easydict import EasyDict
 from optuna import Trial
@@ -21,16 +23,15 @@ from datasets import CellDataLoader
 from finetuning_parameters.datasets import read_train_data
 from training_loop import CellInstanceSegmentation
 
+pl.seed_everything(0)
+load_dotenv()
+
 wider_train_transform = A.Compose([
     A.HorizontalFlip(p=0.5),
     A.VerticalFlip(p=0.5),
     A.Normalize(mean=(0.485,), std=(0.229,)),
     ToTensorV2(),
 ], bbox_params=A.BboxParams(format='pascal_voc', label_fields=['category_ids']))
-
-load_dotenv()
-
-pl.seed_everything(0)
 
 
 def objective(trial: Trial, data: pd.DataFrame, parameters: dict, cfg: EasyDict):
@@ -41,7 +42,7 @@ def objective(trial: Trial, data: pd.DataFrame, parameters: dict, cfg: EasyDict)
     iou_scores = []
     folds = StratifiedKFold(n_splits=cfg.n_splits)
     for ii, (train_indices, val_indices) in enumerate(folds.split(data, data.cell_type)):
-        train_df, val_df = data[train_indices], data[val_indices]
+        train_df, val_df = data.iloc[train_indices], data.iloc[val_indices]
 
         dataloader = CellDataLoader(dataset_path=cfg.dataset_path,
                                     train_df=train_df, val_df=val_df,
@@ -53,12 +54,12 @@ def objective(trial: Trial, data: pd.DataFrame, parameters: dict, cfg: EasyDict)
 
         hparams = cfg.__dict__ | dict(lr=lr, optimizer_name=optimizer_name, scheduler_name=scheduler_name, kfold=ii)
 
-        logger = WandbLogger(project="tuning_model_hparams", config=hparams)
+        logger = WandbLogger(project="tuning_model_hparams",
+                             config=hparams,
+                             name=f"lr={lr},optim={optimizer_name},sched={scheduler_name},kfold={ii}")
         lr_monitor = LearningRateMonitor(logging_interval='step')
 
-        model = CellInstanceSegmentation(cfg=EasyDict(hparams),
-                                         train_dataloader=train_dataloader,
-                                         val_dataloader=val_dataloader)
+        model = CellInstanceSegmentation(cfg=EasyDict(hparams, steps_per_epochs=len(train_dataloader)))
 
         trainer = pl.Trainer(logger=logger,
                              callbacks=[lr_monitor],
@@ -66,18 +67,25 @@ def objective(trial: Trial, data: pd.DataFrame, parameters: dict, cfg: EasyDict)
                              fast_dev_run=True)
 
         trainer.fit(model, train_dataloader, val_dataloader)
-        iou_scores.append(trainer.callback_metrics["val/iou_score"].item())
+        trainer.test(model, val_dataloader)
+        iou_scores.append(trainer.callback_metrics["test/iou_score"].item())
 
     return np.mean(iou_scores)
 
 
 @click.command()
-@click.option("--dataset-path", type=str, default=os.environ['dataset_path'])
-@click.option("--device", type=str, required=True)
+@click.option("--dataset-path", type=str, default=os.environ.get('dataset_path'))
+@click.option("--device", type=str, required=True, help="cpu, cuda:0, ...")
 @click.option('--batch-size', type=int, default=4)
 @click.option("--num-workers", type=int, default=10)
 @click.option('--epochs', type=int, default=50)
-def main(dataset_path: str, device: str, batch_size: int, num_workers: int, epochs: int):
+@click.option("--token", type=str, default="", help="WANDB_API_KEY")
+def main(dataset_path: str, device: str, batch_size: int, num_workers: int, epochs: int, token: str):
+    device = 0 if device == "cpu" else int(device[-1])
+
+    if token:
+        os.environ['WANDB_API_KEY'] = token
+
     with open("params.yaml") as file:
         config = yaml.safe_load(file)
 
@@ -86,7 +94,7 @@ def main(dataset_path: str, device: str, batch_size: int, num_workers: int, epoc
     data = read_train_data(Path(dataset_path))
 
     config = EasyDict(
-        dataset_path=dataset_path,
+        dataset_path=Path(dataset_path),
         device=device,
         batch_size=batch_size,
         num_workers=num_workers,
@@ -94,7 +102,7 @@ def main(dataset_path: str, device: str, batch_size: int, num_workers: int, epoc
         n_splits=n_splits,
     )
 
-    study = optuna.create_study(direction="maximize")
+    study = optuna.create_study(direction="maximize", storage='sqlite:///tuning_parameters.db', load_if_exists=True)
     study.optimize(lambda trial: objective(trial, data, parameters, config), n_trials=1)
 
     saving_dir = Path(".") / "tuning_parameters"

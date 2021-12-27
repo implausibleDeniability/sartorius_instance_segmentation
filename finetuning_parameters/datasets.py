@@ -1,3 +1,4 @@
+import sys
 from pathlib import Path
 
 import albumentations as A
@@ -10,6 +11,7 @@ from skimage import io
 from sklearn.preprocessing import LabelEncoder
 from torch.utils.data import Dataset, DataLoader
 
+sys.path.append("..")
 from src.utils import annotation2mask, get_box
 
 default_transform = A.Compose([
@@ -94,10 +96,12 @@ class CellDataLoader(pl.LightningDataModule):
         return DataLoader(dataset=self.train_dataset,
                           batch_size=self.batch_size,
                           num_workers=self.num_workers,
-                          shuffle=True)
+                          shuffle=True,
+                          collate_fn=lambda x: tuple(zip(*x)))
 
     def val_dataloader(self):
         return DataLoader(dataset=self.val_dataset,
                           batch_size=self.batch_size,
                           num_workers=self.num_workers,
-                          shuffle=False)
+                          shuffle=False,
+                          collate_fn=lambda x: tuple(zip(*x)))

@@ -5,7 +5,7 @@ parameters:
     max: 0.001
 
   optimizer: [ 'Adam', 'SGD', 'AdamW', 'RMSprop' ]
-  scheduler: [ 'OneCycleLR', 'StepLR', 'ReduceLROnPlateau', 'None', 'LinearLR' ]
+  scheduler: [ 'OneCycleLR', 'StepLR', 'ReduceLROnPlateau', 'None' ]
 
 
 

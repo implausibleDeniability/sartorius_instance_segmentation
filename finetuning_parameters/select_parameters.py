@@ -1,7 +1,7 @@
 from torch import nn
 from torch.optim import Optimizer, Adam, AdamW, RMSprop
 from torch.optim import SGD
-from torch.optim.lr_scheduler import OneCycleLR, StepLR, ReduceLROnPlateau, LinearLR
+from torch.optim.lr_scheduler import OneCycleLR, StepLR, ReduceLROnPlateau
 
 
 def get_optimizer(name: str, model: nn.Module, lr: float) -> Optimizer:
@@ -37,9 +37,6 @@ def get_scheduler(name: str, optimizer: Optimizer, **kwargs):
 
     elif name == 'ReduceLROnPlateau':
         return ReduceLROnPlateau(optimizer, mode='min')
-
-    elif name == "LinearLR":
-        return LinearLR(optimizer, start_factor=1.0, total_iters=int(0.75 * epochs))
 
     else:
         raise NotImplemented("{name} is not implemented!")
