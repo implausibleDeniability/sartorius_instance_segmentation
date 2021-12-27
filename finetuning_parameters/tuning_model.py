@@ -102,6 +102,9 @@ def main(dataset_path: str, device: str, batch_size: int, num_workers: int, epoc
         num_workers=num_workers,
         epochs=epochs,
         n_splits=n_splits,
+        mask_threshold=0.5,
+        score_threshold=0.05,
+        nms_threshold=None,
     )
 
     study = optuna.create_study(direction="maximize", storage='sqlite:///tuning_parameters.db', load_if_exists=True)
