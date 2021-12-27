@@ -59,6 +59,12 @@ class CellInstanceSegmentation(pl.LightningModule):
         self.log("val/loss_epoch", loss_epoch.item())
         self.log("val/loss_mask_epoch", loss_mask_epoch.item())
 
+    def test_step(self, batch):
+        pass
+
+    def test_epoch_end(self, outputs) -> None:
+        pass
+
     def on_test_end(self) -> None:
         iou_score = self.calculate_iou(dataloader=self.train_dataloader)
         self.log("test/iou_score", torch.as_tensor(iou_score).item())
