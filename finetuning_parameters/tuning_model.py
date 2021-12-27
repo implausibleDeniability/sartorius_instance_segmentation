@@ -114,15 +114,15 @@ def main(dataset_path: str, device: str, batch_size: int, num_workers: int, epoc
 
     fig = plot_optimization_history(study)
     fig.write_image(saving_dir / "opt_history.jpg", scale=2)
-    wandb.save(saving_dir / "opt_history.jpg")
+    wandb.save(str(saving_dir.absolute() / "opt_history.jpg"))
 
     fig = plot_contour(study)
     fig.write_image(saving_dir / "contour.jpg", scale=2)
-    wandb.save(saving_dir / "contour.jpg")
+    wandb.save(str(saving_dir.absolute() / "contour.jpg"))
 
     fig = plot_param_importances(study)
     fig.write_image(saving_dir / "param_importance.jpg", scale=2)
-    wandb.save(saving_dir / "param_importance.jpg")
+    wandb.save(str(saving_dir.absolute() / "param_importance.jpg"))
 
 
 if __name__ == '__main__':
