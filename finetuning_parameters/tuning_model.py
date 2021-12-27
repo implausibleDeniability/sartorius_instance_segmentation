@@ -4,7 +4,6 @@ from pathlib import Path
 
 import albumentations as A
 import click
-import numpy as np
 import optuna
 import pandas as pd
 import pytorch_lightning as pl
@@ -17,7 +16,7 @@ from optuna import Trial
 from optuna.visualization import plot_optimization_history, plot_param_importances, plot_contour
 from pytorch_lightning.callbacks import LearningRateMonitor
 from pytorch_lightning.loggers import WandbLogger
-from sklearn.model_selection import StratifiedKFold
+from sklearn.model_selection import train_test_split
 
 from datasets import CellDataLoader
 from finetuning_parameters.datasets import read_train_data
@@ -39,39 +38,36 @@ def objective(trial: Trial, data: pd.DataFrame, parameters: dict, cfg: EasyDict)
     optimizer_name = trial.suggest_categorical(name='optimizer', choices=parameters['optimizer'])
     scheduler_name = trial.suggest_categorical(name='scheduler', choices=parameters['scheduler'])
 
-    iou_scores = []
-    folds = StratifiedKFold(n_splits=cfg.n_splits)
-    for ii, (train_indices, val_indices) in enumerate(folds.split(data, data.cell_type)):
-        train_df, val_df = data.iloc[train_indices], data.iloc[val_indices]
+    train_df, val_df = train_test_split(data, test_size=0.2, stratify=data.cell_type)
 
-        dataloader = CellDataLoader(dataset_path=cfg.dataset_path,
-                                    train_df=train_df, val_df=val_df,
-                                    train_transform=wider_train_transform,
-                                    batch_size=cfg.batch_size,
-                                    num_workers=cfg.num_workers)
+    dataloader = CellDataLoader(dataset_path=cfg.dataset_path,
+                                train_df=data, val_df=val_df,
+                                train_transform=wider_train_transform,
+                                batch_size=cfg.batch_size,
+                                num_workers=cfg.num_workers)
 
-        train_dataloader, val_dataloader = dataloader.train_dataloader(), dataloader.val_dataloader()
+    train_dataloader, val_dataloader = dataloader.train_dataloader(), dataloader.val_dataloader()
 
-        hparams = cfg.__dict__ | dict(lr=lr, optimizer_name=optimizer_name, scheduler_name=scheduler_name, kfold=ii)
+    hparams = cfg.__dict__ | dict(lr=lr, optimizer_name=optimizer_name, scheduler_name=scheduler_name)
 
-        logger = WandbLogger(project="tuning_model_hparams",
-                             config=hparams,
-                             name=f"lr={lr},optim={optimizer_name},sched={scheduler_name},kfold={ii}")
-        lr_monitor = LearningRateMonitor(logging_interval='step')
+    logger = WandbLogger(project="tuning_model_hparams",
+                         config=hparams,
+                         name=f"lr={lr},optim={optimizer_name},sched={scheduler_name}")
+    lr_monitor = LearningRateMonitor(logging_interval='step')
 
-        model = CellInstanceSegmentation(cfg=EasyDict(hparams, steps_per_epochs=len(train_dataloader)),
-                                         val_dataloader=val_dataloader)
+    model = CellInstanceSegmentation(cfg=EasyDict(hparams, steps_per_epochs=len(train_dataloader)),
+                                     val_dataloader=val_dataloader)
 
-        trainer = pl.Trainer(logger=logger,
-                             max_epochs=cfg.epochs,
-                             callbacks=[lr_monitor],
-                             gpus=cfg.device)
+    trainer = pl.Trainer(logger=logger,
+                         max_epochs=cfg.epochs,
+                         callbacks=[lr_monitor],
+                         gpus=cfg.device)
 
-        trainer.fit(model, train_dataloader, val_dataloader)
-        trainer.test(model, val_dataloader)
-        iou_scores.append(trainer.callback_metrics["test/iou_score"].item())
+    trainer.fit(model, train_dataloader, val_dataloader)
+    trainer.test(model, val_dataloader)
+    iou_score = trainer.callback_metrics["test/iou_score"].item()
 
-    return np.mean(iou_scores)
+    return iou_score
 
 
 @click.command()
