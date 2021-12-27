@@ -80,7 +80,7 @@ def objective(trial: Trial, data: pd.DataFrame, parameters: dict, cfg: EasyDict)
 @click.option("--token", type=str, default="", help="WANDB_API_KEY")
 def main(dataset_path: str, device: str, batch_size: int, num_workers: int, epochs: int, token: str):
     saving_dir = Path("logs")
-    saving_dir.mkdir()
+    saving_dir.mkdir(exist_ok=True)
 
     device = 0 if device == "cpu" else [int(device[-1])]
 
