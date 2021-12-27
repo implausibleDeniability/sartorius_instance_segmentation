@@ -4,6 +4,7 @@ import numpy as np
 import pytorch_lightning as pl
 import torch
 from easydict import EasyDict
+from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torchvision.models.detection import maskrcnn_resnet50_fpn
 
 from finetuning_parameters.select_parameters import get_optimizer, get_scheduler
@@ -78,8 +79,10 @@ class CellInstanceSegmentation(pl.LightningModule):
                                   steps_per_epochs=self.cfg.steps_per_epochs,
                                   epochs=self.cfg.epochs,
                                   lr=self.cfg.lr)
+        if isinstance(scheduler, ReduceLROnPlateau):
+            return {'optimizer': optimizer, 'lr_scheduler': {'scheduler': scheduler, "monitor": "val/loss_epoch"}}
 
-        return {'optimizer': optimizer, 'lr_scheduler': scheduler, "monitor": "val/loss_epoch"}
+        return [optimizer], [scheduler]
 
     def calculate_iou(self, dataloader):
         self.model.eval()
