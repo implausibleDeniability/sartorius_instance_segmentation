@@ -67,6 +67,7 @@ def objective(trial: Trial, data: pd.DataFrame, parameters: dict, cfg: EasyDict)
     trainer.fit(model, train_dataloader, val_dataloader)
     trainer.test(model, val_dataloader)
     iou_score = trainer.callback_metrics["test/iou_score"].item()
+    print(f"test/iou_score: {iou_score}")
 
     wandb.finish()
 
