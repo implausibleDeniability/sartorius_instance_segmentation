@@ -4,6 +4,9 @@ import numpy as np
 import torch
 from torchvision.ops.boxes import nms
 from linetimer import CodeTimer
+from pycocotools import mask as mutils
+from src.nms import mask_suppression
+from src.utils import get_box
 
 
 def remove_overlapping_pixels_two_masks(mutable_mask: np.ndarray, immutable_mask: np.ndarray):
@@ -76,3 +79,31 @@ def postprocess_predictions(outputs: list[dict],
         })
 
     return result
+
+
+def postprocess_mmdet_predictions(
+    mmdet_masks:list[tuple],
+    nms_threshold: Union[float, None] = 0.1,
+):
+    final_masks = []
+    for image_prediction in mmdet_masks:
+        bboxes_prediction, masks_prediction = image_prediction
+        masks = []
+        scores = []
+        for class_id in range(len(masks_prediction)):
+            masks.extend(map(mutils.decode, masks_prediction[class_id]))
+            scores.extend(bboxes_prediction[class_id][:, 4])
+        
+        masks = np.array(masks)
+        scores = np.array(scores)
+        indices = masks.any(axis=2).any(axis=1)
+        masks, scores = masks[indices], scores[indices]
+        if nms_threshold:
+            masks = mask_suppression(masks, scores, nms_threshold)
+        non_overlapping_masks = remove_overlapping_pixels(masks)
+        assert np.max(np.sum(non_overlapping_masks, axis=0)) <= 1, "Masks overlap"
+
+        final_masks.append({
+            'masks': non_overlapping_masks,
+        })
+    return final_masks
