@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 
 def annotation2mask(annotation: str) -> np.ndarray:
     """Converts annotation string of the image 520x704 to np.ndarray 520x704"""
-    # -1 because they numerate from 1, not from 0
+    # -1 as RLE numerates from 1, not from 0
     segment_starts = np.array(annotation.split()[0::2], dtype=np.int32) - 1 
     segment_lengths = np.array(annotation.split()[1::2], dtype=np.int32)
     segment_ends = segment_starts + segment_lengths 
@@ -33,7 +33,8 @@ def get_box(mask: np.array) -> list:
     return [xmin, ymin, xmax, ymax]
 
 
-def make_deterministic(seed):
+def make_deterministic(seed: int):
+    """Switches packages to deterministic behavior"""
     random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)
