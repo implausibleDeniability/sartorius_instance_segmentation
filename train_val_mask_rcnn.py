@@ -17,17 +17,18 @@ from src.dataset import CellDataset
 from src.image_logger import ImageLogger
 from src.iou_metric import iou_map
 from src.postprocessing import postprocess_predictions
-from src.utils import make_deterministic, images2device, targets2device
+from src.utils import images2device, make_deterministic, targets2device
 
 
 @click.command()
-@click.option("--device", required=True, type=str, help="Device to train on, e.x: cuda:0 or cpu")
+@click.option(
+    "--device", required=True, type=str, help="Device to train on, e.x: cuda:0 or cpu"
+)
 @click.option("--exp_name", required=True, type=str, help="Name of experiment")
 def main(device: str, exp_name: str):
     load_dotenv()
     make_deterministic(seed=42)
 
-    # TODO: folder 'experiments' that contain all possible configurations
     global config
     config = EasyDict(
         dataset_path=Path(os.environ["dataset_path"]),
@@ -42,17 +43,18 @@ def main(device: str, exp_name: str):
         nms_threshold=0.32,
     )
 
-    # configuration
-    experiment_name = exp_name
+    # experiment tracking platform
     wandb.init(
         project="sartorius_instance_segmentation",
         entity="implausible_denyability",
-        name=experiment_name,
+        name=exp_name,
         config=config,
     )
 
-    # DataLoaders
-    train_dataset = CellDataset(cfg=config, mode="train", transform=wider_train_transform)
+    # Data Loaders
+    train_dataset = CellDataset(
+        cfg=config, mode="train", transform=wider_train_transform
+    )
     train_dataloader = DataLoader(
         dataset=train_dataset,
         num_workers=config.num_workers,
@@ -69,6 +71,14 @@ def main(device: str, exp_name: str):
         collate_fn=lambda x: tuple(zip(*x)),
     )
 
+    # Logging predicted masks for further analysis
+    image_logger = ImageLogger(
+        train_dataset=train_dataset,
+        val_dataset=val_dataset,
+        n_images=10,
+        device=config.device,
+    )
+
     # Training
     model = models.detection.maskrcnn_resnet50_fpn(
         num_classes=4, progress=False, box_detections_per_img=500
@@ -83,7 +93,7 @@ def main(device: str, exp_name: str):
         max_lr=1e-3,
     )
 
-    image_logger = ImageLogger(train_dataset=train_dataset, val_dataset=val_dataset, n_images=10, device=config.device)
+    # Run the training
     training(
         model=model,
         optimizer=optimizer,
@@ -94,17 +104,20 @@ def main(device: str, exp_name: str):
         image_logger=image_logger,
     )
 
-    # Save weights
+    # Save model's weights
     weights_dir = config.weights_path
     weights_dir.mkdir(exist_ok=True)
-    weights_path = weights_dir / f"{experiment_name}-{datetime.now().__str__()[:-7]}.ckpt"
+    weights_path = weights_dir / f"{exp_name}-{datetime.now().__str__()[:-7]}.ckpt"
     torch.save(model.state_dict(), weights_path)
     wandb.save(str(weights_path.absolute()))
 
 
-def training(model, optimizer, scheduler, epochs, train_loader, val_loader, image_logger):
+def training(
+    model, optimizer, scheduler, epochs, train_loader, val_loader, image_logger
+):
     for epoch in range(epochs):
         loss, mask_loss = train_epoch(model, train_loader, optimizer, scheduler)
+        # for faster training IOU is tracked once each 7 epochs and last 5 epochs
         if epoch % 7 == 0 or epoch + 5 > config.epochs:
             image_logger.log_images(model)
             train_iou = eval_epoch(model, train_loader)
