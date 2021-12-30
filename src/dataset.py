@@ -31,7 +31,7 @@ class CellDataset(Dataset):
         # For mask rcnn, 0 encodes background, so we should add 1 for encoding in range [1, 3]
         data_csv.cell_type = LabelEncoder().fit_transform(data_csv.cell_type) + 1
 
-        # Now data_csv has 606 rows with 3 columns:
+        # data_csv has 606 rows with 3 columns:
         # - id - id of image,
         # - cell_type - type of cell,
         # - annotation - list of rle strings
@@ -50,13 +50,10 @@ class CellDataset(Dataset):
                                                 stratify=data_csv.cell_type)
 
     def __getitem__(self, item):
-        # TODO: Test how much time does .iloc take
-        # if I (maxim) am not mistaken, that can be quite long
         image_id, cell_type, annotations = self.data_csv.iloc[item]
         image_path = self.image_folder / (image_id + ".png")
         image = io.imread(str(image_path))
 
-        # TODO: consider using rle_decode instead of annotation2mask
         masks = list(map(lambda line: annotation2mask(line), annotations))
         boxes = list(map(lambda mask: get_box(mask), masks))
         labels = list(map(lambda _: cell_type, masks))
@@ -81,7 +78,6 @@ class CellDataset(Dataset):
             'boxes': torch.as_tensor(boxes, dtype=torch.float32),
             'iscrowd': iscrowd,
             'area': torch.as_tensor(area),
-            # 'image_id': image_id,  # For logging purposes
         }
 
         return image, target
