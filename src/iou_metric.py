@@ -1,28 +1,28 @@
 import numpy as np
 
 
-def compute_iou(labels, y_pred):
+def compute_iou(y_true: np.ndarray, y_pred: np.ndarray):
     """
     Computes the IoU for instance labels and predictions.
 
     Args:
-        labels (np array): Labels.
-        y_pred (np array): predictions
+        y_true : true masks, np.ndarray with shape [N_MASKS, HEIGHT, WIDTH]
+        y_pred : predicted masks, np.ndarray with shape [M_MASKS, HEIGHT, WIDTH]
 
     Returns:
         np array: IoU matrix, of size true_objects x pred_objects.
     """
 
-    true_objects = len(np.unique(labels))
+    true_objects = len(np.unique(y_true))
     pred_objects = len(np.unique(y_pred))
 
     # Compute intersection between all objects
     intersection = np.histogram2d(
-        labels.flatten(), y_pred.flatten(), bins=(true_objects, pred_objects)
+        y_true.flatten(), y_pred.flatten(), bins=(true_objects, pred_objects)
     )[0]
 
     # Compute areas (needed for finding the union between all objects)
-    area_true = np.histogram(labels, bins=true_objects)[0]
+    area_true = np.histogram(y_true, bins=true_objects)[0]
     area_pred = np.histogram(y_pred, bins=pred_objects)[0]
     area_true = np.expand_dims(area_true, -1)
     area_pred = np.expand_dims(area_pred, 0)
@@ -31,7 +31,8 @@ def compute_iou(labels, y_pred):
     union = area_true + area_pred - intersection
     # assert (np.abs(union) > 0.00001).all(), "Union has 0 cells"
     iou = intersection / (union + 1e-6)
-    return iou[1:, 1:]  # exclude background
+    iou = iou[1:, 1:] # exclude background
+    return iou 
 
 
 def precision_at(threshold, iou):
@@ -68,21 +69,21 @@ def flatten_masks(masks: np.array):
     return pred
 
 
-def iou_map(truth_masks: np.array, pred_masks: np.array, verbose=0):
+def iou_map(true_masks: np.ndarray, pred_masks: np.ndarray, verbose: int=0) -> float:
     """
     Computes the metric for the competition.
     Masks contain the segmented pixels where each object has one value associated,
     and 0 is the background.
 
     Args:
-        truth_masks:  array of truth masks , e.x. (100, 520, 704)
-        pred_masks:  array of prediction masks, e.x. (200, 520, 704)
+        true_masks: true masks, np.ndarray with shape [N_MASKS, HEIGHT, WIDTH]
+        pred_masks: predicted masks, np.ndarray with shape [M_MASKS, HEIGHT, WIDTH]
         verbose (int, optional): Whether to print infos. Defaults to 0.
 
     Returns:
         float: mAP.
     """
-    truth = flatten_masks(truth_masks)
+    truth = flatten_masks(true_masks)
     pred = flatten_masks(pred_masks)
     ious = [compute_iou(truth, pred)]
 
