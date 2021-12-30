@@ -85,6 +85,15 @@ def postprocess_mmdet_predictions(
     mmdet_masks:list[tuple],
     nms_threshold: Union[float, None] = 0.1,
 ):
+    """
+    Postprocess predictions, produced by mmdetection Cascade R-CNN
+    Args:
+        mmdet_masks: data structure produced by mmdetection Cascade R-CNN, 
+            list of tuples of tuples
+        nms_threshold: threshold value for non-maximum suppression
+    Returns:
+        list of dicts, only dict's value is np.ndarray [N_MASKS, HEIGHT, WIDTH]
+    """
     final_masks = []
     for image_prediction in mmdet_masks:
         bboxes_prediction, masks_prediction = image_prediction
