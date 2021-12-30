@@ -86,7 +86,6 @@ def iou_map(true_masks: np.ndarray, pred_masks: np.ndarray, verbose: int=0) -> f
     pred = flatten_masks(pred_masks)
     ious = [compute_iou(truth, pred)]
 
-    # print(ious[0].shape)
 
     if verbose:
         print("Thresh\tTP\tFP\tFN\tPrec.")
