@@ -10,7 +10,7 @@ def compute_iou(y_true: np.ndarray, y_pred: np.ndarray):
         y_pred : predicted masks, np.ndarray with shape [M_MASKS, HEIGHT, WIDTH]
 
     Returns:
-        np array: IoU matrix, of size true_objects x pred_objects.
+        np array: IoU matrix, of size N_MASKS x M_MASKS.
     """
 
     true_objects = len(np.unique(y_true))
@@ -29,13 +29,12 @@ def compute_iou(y_true: np.ndarray, y_pred: np.ndarray):
 
     # Compute union
     union = area_true + area_pred - intersection
-    # assert (np.abs(union) > 0.00001).all(), "Union has 0 cells"
     iou = intersection / (union + 1e-6)
     iou = iou[1:, 1:] # exclude background
     return iou 
 
 
-def precision_at(threshold, iou):
+def precision_at(threshold: float, iou: np.ndarray):
     """
     Computes the precision at a given threshold.
 
@@ -60,7 +59,7 @@ def precision_at(threshold, iou):
     return tp, fp, fn
 
 
-def flatten_masks(masks: np.array):
+def flatten_masks(masks: np.ndarray):
     """Takes the array of binary masks, enumerates them and collect them in 2d mask"""
     pred = np.zeros((masks.shape[1], masks.shape[2]), dtype=np.int64)
     for ii, mask in enumerate(masks):
