@@ -1,6 +1,8 @@
 # Kaggle Competition: Sartorius Cell Instance Segmentation
 
-![train-data-visualisation](figures/data_visualisation.png)
+![train-data-visualisation](figures/type0.png)
+![train-data-visualisation](figures/type1.png)
+![train-data-visualisation](figures/type2.png)
 *Visualisation of cells in training data*
 
 ## Description
