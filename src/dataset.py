@@ -29,7 +29,8 @@ class CellDataset(Dataset):
         data_csv = data_csv.groupby(['id', 'cell_type'])['annotation'].agg(lambda x: list(x)).reset_index()
 
         # For mask rcnn, 0 encodes background, so we should add 1 for encoding in range [1, 3]
-        data_csv.cell_type = LabelEncoder().fit_transform(data_csv.cell_type) + 1
+        self.label_encoder = LabelEncoder().fit(data_csv.cell_type)
+        data_csv.cell_type = self.label_encoder.transform(data_csv.cell_type) + 1
 
         # data_csv has 606 rows with 3 columns:
         # - id - id of image,
@@ -40,9 +41,9 @@ class CellDataset(Dataset):
                 self.data_csv = data_csv
             else:
                 self.data_csv, _ = train_test_split(data_csv,
-                                                test_size=cfg.val_size,
-                                                random_state=0,
-                                                stratify=data_csv.cell_type)
+                                                    test_size=cfg.val_size,
+                                                    random_state=0,
+                                                    stratify=data_csv.cell_type)
         else:
             _, self.data_csv = train_test_split(data_csv,
                                                 test_size=cfg.val_size,
@@ -80,6 +81,7 @@ class CellDataset(Dataset):
             'area': torch.as_tensor(area),
         }
 
+        # return image, target, self.label_encoder.inverse_transform([cell_type - 1])[0], image_id
         return image, target
 
     def __len__(self):

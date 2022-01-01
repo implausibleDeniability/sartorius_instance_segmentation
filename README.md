@@ -1,9 +1,9 @@
 # Kaggle Competition: Sartorius Cell Instance Segmentation
 
-![train-data-visualisation](figures/type0.png)
-![train-data-visualisation](figures/type1.png)
-![train-data-visualisation](figures/type2.png)
-*Visualisation of cells in training data*
+![train-data-visualisation](figures/45a1f06614f0-astro.png)
+![train-data-visualisation](figures/508d39dcc9ef-cort.png)
+![train-data-visualisation](figures/aff8fb4fc364-shsy5y.png)
+*Types of cells from top to bottom: astro, cort, shsy5y*
 
 ## Description
 
