@@ -1,4 +1,3 @@
-import sys
 from pathlib import Path
 
 import albumentations as A
@@ -11,7 +10,6 @@ from skimage import io
 from sklearn.preprocessing import LabelEncoder
 from torch.utils.data import Dataset, DataLoader
 
-sys.path.append("..")
 from src.utils import annotation2mask, get_box
 
 default_transform = A.Compose([
@@ -20,7 +18,8 @@ default_transform = A.Compose([
 ], bbox_params=A.BboxParams(format='pascal_voc', label_fields=['category_ids']))
 
 
-def read_train_data(dataset_path: Path):
+def read_train_data(dataset_path: Path) -> pd.DataFrame:
+    """Reading annotations for labeled images"""
     data_csv = pd.read_csv(dataset_path / "train.csv")
     data_csv = data_csv[['id', 'annotation', 'cell_type']]
     data_csv = data_csv.groupby(['id', 'cell_type'])['annotation'].agg(lambda x: list(x)).reset_index()
@@ -33,7 +32,9 @@ class CellDataset(Dataset):
     def __init__(self, dataset_path: Path, df: pd.DataFrame, transform: A.Compose = None):
         """
         Args:
-            df - DataFrame, obtained from k-fold splitting
+            dataset_path - Path to dataset folder (needed for reading images)
+            df - pd.DataFrame, whole data or k-split
+            transform - albumentations transform for images
         """
 
         self.transform = transform

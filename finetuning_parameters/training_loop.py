@@ -1,4 +1,6 @@
-import sys
+"""
+Wrapper for training/validation/testing loop, implemented with pytorch-lightning.
+"""
 
 import numpy as np
 import pytorch_lightning as pl
@@ -7,9 +9,7 @@ from easydict import EasyDict
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torchvision.models.detection import maskrcnn_resnet50_fpn
 
-from finetuning_parameters.select_parameters import get_optimizer, get_scheduler
-
-sys.path.append("..")
+from finetuning_parameters.select_parameters import choose_optimizer, choose_scheduler
 from src.iou_metric import iou_map
 from src.postprocessing import postprocess_predictions
 
@@ -68,22 +68,6 @@ class CellInstanceSegmentation(pl.LightningModule):
         iou_score = self.calculate_iou(dataloader=self.val_dataloader)
         self.log("test/iou_score", torch.as_tensor(iou_score).item())
 
-    def configure_optimizers(self):
-        optimizer = get_optimizer(name=self.cfg.optimizer_name, model=self.model, lr=self.cfg.lr)
-
-        if self.cfg.scheduler_name == 'None':
-            return optimizer
-
-        scheduler = get_scheduler(name=self.cfg.scheduler_name,
-                                  optimizer=optimizer,
-                                  steps_per_epochs=self.cfg.steps_per_epochs,
-                                  epochs=self.cfg.epochs,
-                                  lr=self.cfg.lr)
-        if isinstance(scheduler, ReduceLROnPlateau):
-            return {'optimizer': optimizer, 'lr_scheduler': {'scheduler': scheduler, "monitor": "val/loss_epoch"}}
-
-        return [optimizer], [scheduler]
-
     def calculate_iou(self, dataloader):
         self.model.eval()
 
@@ -110,3 +94,19 @@ class CellInstanceSegmentation(pl.LightningModule):
                 scores.append(iou)
 
         return np.mean(scores)
+
+    def configure_optimizers(self):
+        optimizer = choose_optimizer(name=self.cfg.optimizer_name, model=self.model, lr=self.cfg.lr)
+
+        if self.cfg.scheduler_name == 'None':
+            return optimizer
+
+        scheduler = choose_scheduler(name=self.cfg.scheduler_name,
+                                     optimizer=optimizer,
+                                     steps_per_epochs=self.cfg.steps_per_epochs,
+                                     epochs=self.cfg.epochs,
+                                     lr=self.cfg.lr)
+        if isinstance(scheduler, ReduceLROnPlateau):
+            return {'optimizer': optimizer, 'lr_scheduler': {'scheduler': scheduler, "monitor": "val/loss_epoch"}}
+
+        return [optimizer], [scheduler]

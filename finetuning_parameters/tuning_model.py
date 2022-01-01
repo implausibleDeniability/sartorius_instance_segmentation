@@ -33,7 +33,17 @@ wider_train_transform = A.Compose([
 ], bbox_params=A.BboxParams(format='pascal_voc', label_fields=['category_ids']))
 
 
-def objective(trial: Trial, data: pd.DataFrame, parameters: dict, cfg: EasyDict):
+def objective(trial: Trial, data: pd.DataFrame, parameters: dict, cfg: EasyDict) -> float:
+    """Choosing hparam function that makes the experiment
+    Args:
+        trial: object that suggests hparam
+        data: dataframe with annotations
+        parameters: dict, containing names of optimizers and schedulers
+        cfg: non-tuning parameters for training model (batch size, ...)
+
+    Returns:
+        Validation iou score of the experiment
+    """
     lr = trial.suggest_float(name="lr", low=parameters['lr']['min'], high=parameters['lr']['max'])
     optimizer_name = trial.suggest_categorical(name='optimizer', choices=parameters['optimizer'])
     scheduler_name = trial.suggest_categorical(name='scheduler', choices=parameters['scheduler'])
@@ -111,6 +121,7 @@ def main(dataset_path: str, device: str, batch_size: int, num_workers: int, epoc
                                 load_if_exists=True)
     study.optimize(lambda trial: objective(trial, data, parameters, config), n_trials=20)
 
+    # Dumping experiment logs and visualisations
     with open(saving_dir / "optuna_logs.pickle", "wb") as file:
         pickle.dump(study, file)
 

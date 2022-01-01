@@ -4,7 +4,7 @@ from torch.optim import SGD
 from torch.optim.lr_scheduler import OneCycleLR, StepLR, ReduceLROnPlateau
 
 
-def get_optimizer(name: str, model: nn.Module, lr: float) -> Optimizer:
+def choose_optimizer(name: str, model: nn.Module, lr: float) -> Optimizer:
     if name == 'SGD':
         return SGD(model.parameters(), lr=lr)
 
@@ -21,7 +21,7 @@ def get_optimizer(name: str, model: nn.Module, lr: float) -> Optimizer:
         raise NotImplemented(f"{name} optimizer not found!")
 
 
-def get_scheduler(name: str, optimizer: Optimizer, **kwargs):
+def choose_scheduler(name: str, optimizer: Optimizer, **kwargs):
     steps_per_epochs = kwargs['steps_per_epochs']
     epochs = kwargs['epochs']
     lr = kwargs['lr']
