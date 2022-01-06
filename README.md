@@ -1,16 +1,16 @@
 # Kaggle Competition: Sartorius Cell Instance Segmentation
 
-Solution of Sartorius Cell Instance Segmentation competition.
+Solution of Sartorius Cell Instance Segmentation competition by 
+[Shamil Arslanov](https://github.com/homomorfism) and 
+[Maxim Faleev](https://github.com/implausibleDeniability)
 
-## Links
-
-- [Project workflow](https://www.notion.so/Kaggle-Instance-Segmentation-f5a291c7ffc34559927d2dedb8405c14)
+- [Project workflow](https://shamil-arslanov.notion.site/Cell-Instance-Segmentation-f5a291c7ffc34559927d2dedb8405c14)
 - [kaggle competition overview](https://www.kaggle.com/c/sartorius-cell-instance-segmentation/)
 
+![train-data-visualisation](figures/aff8fb4fc364-shsy5y.png)
 ![train-data-visualisation](figures/45a1f06614f0-astro.png)
 ![train-data-visualisation](figures/508d39dcc9ef-cort.png)
-![train-data-visualisation](figures/aff8fb4fc364-shsy5y.png)
-*Types of cells from top to bottom: astro, cort, shsy5y*
+*Types of cells from top to bottom: shsy5y, astro, cort*
 
 ## Contents
 - **Mask R-CNN**  
@@ -49,8 +49,3 @@ Solution of Sartorius Cell Instance Segmentation competition.
 
 - `ModuleNotFoundError...` - add root folder of repository by running `export PYTHONPATH=$PYTHONPATH:/path/to/repo`
 
-
-## Authors of repository
-
-- [Maxim Faleev](https://github.com/implausibleDeniability)
-- [Shamil Arslanov](https://github.com/homomorfism)
