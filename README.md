@@ -2,6 +2,11 @@
 
 Solution of Sartorius Cell Instance Segmentation competition.
 
+## Links
+
+- [Project workflow](https://www.notion.so/Kaggle-Instance-Segmentation-f5a291c7ffc34559927d2dedb8405c14)
+- [kaggle competition overview](https://www.kaggle.com/c/sartorius-cell-instance-segmentation/)
+
 ![train-data-visualisation](figures/45a1f06614f0-astro.png)
 ![train-data-visualisation](figures/508d39dcc9ef-cort.png)
 ![train-data-visualisation](figures/aff8fb4fc364-shsy5y.png)
@@ -26,6 +31,12 @@ Solution of Sartorius Cell Instance Segmentation competition.
     Postprocessing of the NN output includes non-maximal suppression, removal of overlapping pixels, 
     and other transformations. Parameters for these transformations can be optimzed through 
     `thresholds_optimization.py`. Results are available in `thresolds/`
+    
+## How to download data
+
+- `cd data/`
+- `kaggle competitions download -c sartorius-cell-instance-segmentation`
+- `unzip sartorius-cell-instance-segmentation.zip`
 
 ## How to run training script
 
@@ -34,24 +45,12 @@ Solution of Sartorius Cell Instance Segmentation competition.
 3. Run `pip install -r requirements.txt` for installing needed packages
 4. Run training by command `python train_val_mask_rcnn.py --device cuda:0 --exp_name init-training`
 
-## Additional information
-
-### Links
-
-- kaggle competition overview: [kaggle.com](https://www.kaggle.com/c/sartorius-cell-instance-segmentation/)
-- state of the project: [notion.so](https://www.notion.so/Kaggle-Instance-Segmentation-f5a291c7ffc34559927d2dedb8405c14)
-
-### Troubleshooting
+## Troubleshooting
 
 - `ModuleNotFoundError...` - add root folder of repository by running `export PYTHONPATH=$PYTHONPATH:/path/to/repo`
 
-### Downloading data from competition
-
-- `cd data/`
-- `kaggle competitions download -c sartorius-cell-instance-segmentation`
-- `unzip sartorius-cell-instance-segmentation.zip`
 
 ## Authors of repository
 
-- Maxim Faleev, [github.com](https://github.com/implausibleDeniability)
-- Shamil Arslanov, [github.com](https://github.com/homomorfism)
+- [Maxim Faleev](https://github.com/implausibleDeniability)
+- [Shamil Arslanov](https://github.com/homomorfism)
