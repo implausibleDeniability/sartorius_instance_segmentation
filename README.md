@@ -31,6 +31,8 @@ Solution of Sartorius Cell Instance Segmentation competition by
     Postprocessing of the NN output includes non-maximal suppression, removal of overlapping pixels, 
     and other transformations. Parameters for these transformations can be optimzed through 
     `thresholds_optimization.py`. Results are available in `thresolds/`
+- **Exploratory Data Analysis**  
+    All EDA performed during the competition is available in `jupyter-notebooks/`
     
 ## How to download data
 
