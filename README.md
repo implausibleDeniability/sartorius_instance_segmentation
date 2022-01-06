@@ -8,21 +8,21 @@ Solution of Sartorius Cell Instance Segmentation competition.
 *Types of cells from top to bottom: astro, cort, shsy5y*
 
 ## Contents
-- **Mask R-CNN**
+- **Mask R-CNN**  
     The initial model we've used was Mask R-CNN. 
     The model was trained with **pytorch**.
     For the usage example, see the instructions in section below.
-- **Cascade R-CNN**
+- **Cascade R-CNN**  
     Cascade R-CNN was trained through **mmdetection** library.
     All necessary data transformation, model architecture, training and inference
     scripts are available at `mmdetection_training/`
-- **Transfer Learning**
+- **Transfer Learning**  
     The organizers of the dataset supply large dataset with various types of cells. 
     The dataset was used for transfer learning, see `src/pretrain.py`
-- **Hyperparameters optimization**
+- **Hyperparameters optimization**  
     Hyperparameters were optimized with **optuna**. 
     Optimization scripts, config template and instructions are in `finetuning_parameters/`
-- **Postprocessing optimization**
+- **Postprocessing optimization**  
     Postprocessing of the NN output includes non-maximal suppression, removal of overlapping pixels, 
     and other transformations. Parameters for these transformations can be optimzed through 
     `thresholds_optimization.py`. Results are available in `thresolds/`
