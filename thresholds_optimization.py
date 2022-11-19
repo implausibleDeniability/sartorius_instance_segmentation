@@ -10,6 +10,7 @@ from easydict import EasyDict
 from tqdm import tqdm
 import pickle
 import optuna
+import click
 
 from src.postprocessing import postprocess_predictions
 from src.dataset import CellDataset
@@ -17,27 +18,30 @@ from src.augmentations import train_transform
 from src.utils import images2device
 from src.iou_metric import iou_map
 
-def main():
+@click.command()
+@click.option(
+    "--device", required=True, type=str, help="Device to train on, e.x: cuda:0 or cpu"
+)
+def main(device: str):
     load_dotenv()
 
-    experiment_name = 'bsln200ep_flips'
-    weights_name = f'{experiment_name}.ckpt'
+    weights_name = f'inference.ckpt'
     weights_path = Path(os.environ["weights_path"]) / weights_name
 
     global config
     config = EasyDict(
         dataset_path=Path(os.environ["dataset_path"]),
-        device="cuda:1",
+        device=device,
         val_size=0.2,
         batch_size=6,
-        num_workers=30,
+        num_workers=3,
         epochs=1,
         mask_threshold=0.5,
         score_threshold=0.2,
         nms_threshold=None,
     )
 
-    model = maskrcnn_resnet50_fpn(progress=False, num_classes=2, box_detections_per_img=500)
+    model = maskrcnn_resnet50_fpn(progress=False, num_classes=4, box_detections_per_img=500)
     model.load_state_dict(torch.load(weights_path, map_location=torch.device(config.device)))
     model.to(config.device)
     model.eval()
@@ -53,9 +57,9 @@ def main():
     study = optuna.create_study(direction='maximize')
     for i in range(40):
         study.optimize(lambda trial: evaluate_thresholds(trial, model, train_dataloader), n_trials=3)
-        with open(f"thresholds/{experiment_name}.pickle", 'wb') as file:
+        with open(f"thresholds/{exp_name}.pickle", 'wb') as file:
             pickle.dump(study, file)
-        study.trials_dataframe().to_csv(f"thresholds/{experiment_name}.csv", index=False)
+        study.trials_dataframe().to_csv(f"thresholds/{exp_name}.csv", index=False)
 
 
 def evaluate_thresholds(trial, model, dataloader):
