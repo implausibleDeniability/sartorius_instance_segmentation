@@ -160,8 +160,6 @@ def eval_epoch(model, loader):
     model.eval()
     ious = []
     for batch_idx, (images, targets) in enumerate(tqdm(loader)):
-        if batch_idx > 31:
-            break
         images = images2device(images, config.device)
         outputs = model(images)
         processed_outputs = postprocess_predictions(
