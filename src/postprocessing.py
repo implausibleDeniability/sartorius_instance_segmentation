@@ -1,9 +1,7 @@
 from typing import Union
 
 import numpy as np
-import torch
 from torchvision.ops.boxes import nms
-from linetimer import CodeTimer
 from pycocotools import mask as mutils
 from src.nms import mask_suppression
 from src.utils import get_box
