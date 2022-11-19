@@ -53,7 +53,7 @@ def main(device: str, exp_name: str):
 
     # Data Loaders
     train_dataset = CellDataset(
-        cfg=config, mode="train", transform=wider_train_transform
+        cfg=config, mode="train", transform=train_transform
     )
     train_dataloader = DataLoader(
         dataset=train_dataset,
