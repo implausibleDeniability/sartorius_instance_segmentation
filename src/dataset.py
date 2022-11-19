@@ -61,22 +61,22 @@ class CellDataset(Dataset):
 
         if self.transform:
             transformed = self.transform(image=image, masks=masks, bboxes=boxes, category_ids=labels)
-
             image = transformed['image']
             masks = transformed['masks']
             boxes = transformed['bboxes']
             labels = transformed['category_ids']
-
-        boxes = np.asarray(boxes)
-        area = (boxes[:, 3] - boxes[:, 1]) * (boxes[:, 2] - boxes[:, 0])
+            boxes = np.asarray(boxes)
+            area = (boxes[:, 3] - boxes[:, 1]) * (boxes[:, 2] - boxes[:, 0])
+        else:
+            raise Exception("Please use transform")
 
         # Training on all samples (setting iscrown=False)
         iscrowd = torch.zeros((len(masks),), dtype=torch.int64)
 
         target = {
-            'masks': torch.as_tensor(np.array(masks)),
-            'labels': torch.as_tensor(np.array(labels), dtype=torch.int64),
-            'boxes': torch.as_tensor(boxes, dtype=torch.float32),
+            'masks': torch.stack(masks),
+            'labels': torch.as_tensor(labels, dtype=torch.int64),
+            'boxes': torch.as_tensor(boxes),
             'iscrowd': iscrowd,
             'area': torch.as_tensor(area),
         }
