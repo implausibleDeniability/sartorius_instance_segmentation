@@ -3,8 +3,7 @@ from typing import Union
 import numpy as np
 from torchvision.ops.boxes import nms
 from pycocotools import mask as mutils
-from src.nms import mask_suppression
-from src.utils import get_box
+#from src.nms import mask_suppression
 
 
 def remove_overlapping_pixels_two_masks(mutable_mask: np.ndarray, immutable_mask: np.ndarray):
