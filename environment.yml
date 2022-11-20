@@ -1,0 +1,11 @@
+name: cellpose_env
+channels:
+  - defaults
+  - conda-forge
+
+dependencies:
+  - cellpose
+  - matplotlib
+  - pandas
+  - tifffile
+  - scikit-image

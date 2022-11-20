@@ -16,3 +16,5 @@ pycocotools
 imagecodecs
 imagecodecs-lite
 optuna
+
+cellpose
