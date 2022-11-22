@@ -1,4 +1,3 @@
-import sys
 import numpy as np
 from cellpose import models, io, plot
 from pathlib import Path
@@ -23,7 +22,7 @@ def generate_predictions_df(test_dir: Path, pretrained_model: Path) -> pd.DataFr
     ids, masks = [], []
     for fn in tqdm(test_files):
         id_ = fn.split('/')[-1].replace('_img.tif', '')
-        preds, flows, _ = model.eval(io.imread(fn), diameter=16, channels=[0, 0], augment=True, resample=True)
+        preds, flows, _ = model.eval(io.imread(fn), diameter=19, channels=[0, 0], augment=True, resample=True)
         for i in range(1, preds.max() + 1):
             ids.append(id_)
             masks.append(rle_encode(preds == i))
