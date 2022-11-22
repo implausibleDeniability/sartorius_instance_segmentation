@@ -35,7 +35,7 @@ def main(device: str, exp_name: str):
         weights_path=Path(os.environ["weights_path"]),
         device=device,
         val_size=0.2,
-        batch_size=4,
+        batch_size=2,
         num_workers=4,
         epochs=1,
         mask_threshold=0.42,

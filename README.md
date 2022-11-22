@@ -45,7 +45,10 @@ Solution of Sartorius Cell Instance Segmentation competition by
 1. Download data (see instructions below)
 2. Rename `.env.example` file to `.env` and specify paths for dataset and weights storage
 3. Run `pip install -r requirements.txt` for installing needed packages
-4. Run training by command `python train_val_mask_rcnn.py --device cuda:0 --exp_name init-training`
+4. Run training by command  
+```
+PYTHONPATH=. python src/train_val_mask_rcnn.py --device cuda:0 --exp_name init-training
+```
 
 ## Troubleshooting
 
