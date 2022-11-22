@@ -1,0 +1,17 @@
+# install environment:
+# conda env create python=3.9 --file environment.yml
+name: env
+channels:
+  - defaults
+  - conda-forge
+  - anaconda
+
+dependencies:
+  - pip
+  - cellpose
+  - matplotlib
+  - pandas
+  - tifffile
+  - scikit-image
+  - pip:
+      - numpy

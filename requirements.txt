@@ -16,3 +16,8 @@ pycocotools
 imagecodecs
 imagecodecs-lite
 optuna
+
+cellpose
+numpy
+tqdm
+pandas
