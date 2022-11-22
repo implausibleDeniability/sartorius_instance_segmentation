@@ -87,9 +87,9 @@ def objective(trial: Trial, data: pd.DataFrame, parameters: dict, cfg: EasyDict)
 @click.command()
 @click.option("--dataset-path", type=str, default=os.environ.get('dataset_path'))
 @click.option("--device", type=str, required=True, help="cpu, cuda:0, ...")
-@click.option('--batch-size', type=int, default=4)
-@click.option("--num-workers", type=int, default=10)
-@click.option('--epochs', type=int, default=50)
+@click.option('--batch-size', type=int, default=2)
+@click.option("--num-workers", type=int, default=4)
+@click.option('--epochs', type=int, default=10)
 @click.option("--token", type=str, default="", help="WANDB_API_KEY")
 def main(dataset_path: str, device: str, batch_size: int, num_workers: int, epochs: int, token: str):
     saving_dir = Path("logs")
@@ -100,7 +100,7 @@ def main(dataset_path: str, device: str, batch_size: int, num_workers: int, epoc
     if token:
         os.environ['WANDB_API_KEY'] = token
 
-    with open("params.yaml") as file:
+    with open("finetuning_parameters/params.yaml") as file:
         config = yaml.safe_load(file)
 
     parameters = config['parameters']
