@@ -58,7 +58,7 @@ for idx, row in df.iterrows():
     plt.imshow(mask, alpha=0.5)
     plt.axis('off')
     plt.grid(visible=None)
-    plt.savefig(saving_dir / f"image_{idx}.png", bbox_inches='tight', pad_inches=0.0)
+    plt.savefig(saving_dir / f"{row['id']}_{idx}.png", bbox_inches='tight', pad_inches=0.0)
 
     count += 1
     if count >= 60:

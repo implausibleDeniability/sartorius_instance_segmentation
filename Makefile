@@ -3,8 +3,8 @@
 # download cellpose train/test data
 download_cellpose_data:
 	mkdir -p data/cellpose
-	cd data/cellpose;
-	kaggle datasets download -d ks2019/sartorius-train-tif;
+	cd data/cellpose; \
+	kaggle datasets download -d ks2019/sartorius-train-tif; \
 	unzip sartorius-train-tif.zip
 
 # generates images with broken masks
